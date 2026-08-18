@@ -67,3 +67,9 @@ Calibration 4 adds `directory_eof_observed` as an independently required stage c
 Calibration 4 ended before an action. Qwen 3.6 placed 128 tokens of reasoning in Ollama's `thinking` field, reached the response limit, and returned empty `content`. The failure-complete path retained the response and terminal evidence. The model was unloaded and `/api/ps` verified empty.
 
 Calibration 5 adds an explicit top-level Ollama `think: false` request and records `think: false` with the inference settings. This is a response-transport correction: the model must place the JSON action in `content`, which is the only field the runner executes. Model, task text, corpus, adapter, scoring, budgets, isolation, and temperature remain fixed. The explicit seed advances to 1005. A non-experimental JSON smoke test will verify the response field and be followed by an explicit unload before calibration 5.
+
+## Model-action rejection after run 5
+
+The response-mode correction worked. Qwen 3.6 reached directory EOF and read all ten records, then emitted the schema-invalid `{"action":"close","fd":5}`. The runner treated this model-originated error as an infrastructure exception and ended the run before an answer.
+
+Calibration 6 changes that boundary. Invalid JSON or an invalid top-level action is logged as `model_action_rejected` with `syscall: null`, returned to the same context, and charged against the ordinary step limit. It never reaches the adapter. This permits observable bounded self-repair without silently normalizing model output. Qwen 3.6, non-thinking mode, temperature 0, and all task conditions remain fixed; the explicit seed advances to 1006.

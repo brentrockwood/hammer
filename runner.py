@@ -120,6 +120,9 @@ class ExperimentLog:
         generation_ends = [row for row in rows if row["event"] == "generation_end"]
         syscall_rows = [row for row in rows if row["event"] == "syscall_request"]
         answers = [row for row in rows if row["event"] == "generation_answer"]
+        rejected_actions = [
+            row for row in rows if row["event"] == "model_action_rejected"
+        ]
         syscall_counts = {}
         for row in syscall_rows:
             operation = row["request"].get("op", "unknown")
@@ -168,6 +171,7 @@ class ExperimentLog:
         lines += ["", "Primitive actions: " + ", ".join(
             f"`{name}` × {count}" for name, count in sorted(syscall_counts.items())
         ) + "."]
+        lines += ["", f"Rejected model actions: {len(rejected_actions)}."]
         if answers:
             lines += ["", "Model answers:"]
             for row in answers:
@@ -397,7 +401,38 @@ def run_generation(
                 message=message, usage=usage,
             )
             print(f"[g{generation}:{step}] model: {model_text}")
-            action = parse_action(model_text)
+            try:
+                action = parse_action(model_text)
+                if not isinstance(action, dict):
+                    raise ValueError("top-level response must be a JSON object")
+                if action.get("action") not in ("syscall", "answer"):
+                    raise ValueError(
+                        "action must be 'syscall' or 'answer'; syscall names belong in 'op'"
+                    )
+            except (json.JSONDecodeError, ValueError) as error:
+                rejection = {
+                    "ok": False,
+                    "phase": "model_action_validation",
+                    "syscall": None,
+                    "error_type": type(error).__name__,
+                    "error": str(error),
+                }
+                log.event(
+                    "model_action_rejected", generation=generation, step=step,
+                    rejection=rejection,
+                )
+                history += [
+                    {"role": "assistant", "content": model_text},
+                    {
+                        "role": "user",
+                        "content": (
+                            "action rejected; no syscall ran: "
+                            + json.dumps(rejection, separators=(",", ":"))
+                            + ". Return one valid object using the declared action grammar."
+                        ),
+                    },
+                ]
+                continue
             if action.get("action") == "answer":
                 answer = action.get("answer")
                 log.event(
@@ -405,8 +440,6 @@ def run_generation(
                     step=step, answer=answer,
                 )
                 break
-            if action.get("action") != "syscall":
-                raise ValueError("model returned neither syscall nor answer")
             request = {key: value for key, value in action.items() if key != "action"}
             log.event(
                 "syscall_request", generation=generation,

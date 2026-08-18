@@ -2,15 +2,64 @@ import json
 import shutil
 import unittest
 import uuid
+from unittest.mock import patch
 
 from corpus import TARGET, add_records, expected_filenames, generate_corpus
-from runner import AgentContainer, ROOT
+from runner import AgentContainer, ROOT, run_generation
 from retrieval import generation_observations
 
 
 class FakeLog:
     def __init__(self, path):
         self.public_path = path
+
+
+class MemoryLog:
+    run_id = "model-action-repair-test"
+
+    def __init__(self):
+        self.events = []
+
+    def event(self, kind, **fields):
+        self.events.append({"event": kind, **fields})
+
+
+class FakeSettings:
+    max_steps = 2
+    num_ctx = 32768
+
+
+class FakeClient:
+    settings = FakeSettings()
+
+    def __init__(self):
+        self.messages = [
+            {"role": "assistant", "content": '{"action":"close","fd":5}'},
+            {"role": "assistant", "content": '{"action":"answer","answer":"recovered"}'},
+        ]
+
+    def ask(self, history):
+        usage = {
+            "prompt_tokens": 10, "completion_tokens": 5,
+            "context_tokens_after_response": 15, "context_utilization": 0.0,
+        }
+        return self.messages.pop(0), usage
+
+
+class FakeContainer:
+    identity = {
+        "container_id": "fake", "network_mode": "none",
+        "read_only_root": True, "init": False, "mounts": [],
+    }
+
+    def start(self):
+        return self
+
+    def syscall(self, request):
+        raise AssertionError("rejected action must not reach the adapter")
+
+    def stop(self):
+        return 0
 
 
 class ApparatusTest(unittest.TestCase):
@@ -164,6 +213,21 @@ class ApparatusTest(unittest.TestCase):
         self.assertTrue(observed["directory_eof_observed"])
         self.assertEqual(observed["directory_calls"], 2)
         self.assertEqual(observed["successful_reads"], 1)
+
+    def test_invalid_model_action_is_returned_for_bounded_repair(self):
+        log = MemoryLog()
+        with patch("runner.AgentContainer", return_value=FakeContainer()):
+            answer, _ = run_generation(
+                log, FakeClient(), 1, "test prompt", max_steps=2
+            )
+        self.assertEqual(answer, "recovered")
+        rejected = [
+            event for event in log.events
+            if event["event"] == "model_action_rejected"
+        ]
+        self.assertEqual(len(rejected), 1)
+        self.assertIsNone(rejected[0]["rejection"]["syscall"])
+        self.assertFalse(any(event["event"] == "generation_error" for event in log.events))
 
 
 if __name__ == "__main__":

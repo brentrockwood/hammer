@@ -42,6 +42,12 @@ Calibration 4 produced no executable action. Qwen 3.6 used the entire 128-token 
 
 The client now sends top-level `think: false` and records that value beside the sampling options. Only `content` is parsed or executed. Calibration 5 keeps Qwen 3.6, temperature 0, and every task condition fixed while advancing the seed to 1005. A small response-field smoke test precedes the run and is not scored as an experiment.
 
+## Model-action validation
+
+Calibration 5 confirmed the response transport and reached explicit directory EOF. After reading all ten records, Qwen 3.6 emitted `{"action":"close","fd":5}` rather than placing `close` in the `op` field of a syscall action. The runner terminated with a `ValueError`; no malformed action reached the adapter.
+
+That was an incorrect failure classification. Model-originated syntax and top-level schema errors are now recorded as rejected actions with `syscall: null`, returned to the same context for possible repair, and bounded by the existing step limit. The runner does not normalize or execute them. A unit test requires one invalid close action to be rejected and a following valid answer to complete normally. Calibration 6 keeps Qwen 3.6 and all task conditions fixed, with seed 1006.
+
 ## Remaining boundaries
 
 The log is complete at the adapter boundary, not a kernel-wide trace. The hidden startup open of `/work`, container runtime setup, and host activity are outside the model action trajectory. The protocol is ASCII and caps a single read or directory request at 4096 bytes. The adapter does not expose directory creation, renaming, deletion, execution, or compilation. These are intentional Pilot 1 constraints, not general operating-system semantics.
