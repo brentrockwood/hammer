@@ -26,6 +26,8 @@ On each turn return ONLY one JSON object. Available actions are:
 {{"action":"syscall","op":"close","fd":NUMBER}}
 The getdents64 count must be between 512 and 4096. When finished, return {{"action":"answer","answer":["filename", "..."]}}. No shell exists. Do not assume any action beyond those listed."""
 
+MIN_RETRIEVAL_PREDICT = 512
+
 
 def primitive_baseline(file_count):
     # A linux_dirent64 record for our names occupies at most 48 bytes. The
@@ -76,6 +78,11 @@ def main():
     settings = Settings()
     if settings.seed is None:
         raise SystemExit("HAMMER_SEED must be explicit for retrieval calibration")
+    if settings.num_predict < MIN_RETRIEVAL_PREDICT:
+        raise SystemExit(
+            f"HAMMER_NUM_PREDICT must be at least {MIN_RETRIEVAL_PREDICT} "
+            "so the largest calibrated answer can fit"
+        )
 
     run_id = new_run_id("retrieval-calibration")
     log = ExperimentLog(run_id)

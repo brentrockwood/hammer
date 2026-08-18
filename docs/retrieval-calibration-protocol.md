@@ -12,7 +12,7 @@ Can the fixed adapter, action budget, context window, and logging path support a
 
 - Model: `qwen2.5:7b-instruct`, identified by the digest recorded at run time.
 - Ollama context requested: 32,768 tokens.
-- Maximum response: 128 tokens per model call.
+- Initial calibration maximum response: 128 tokens per model call.
 - Calibration 1 sampling: temperature 0, explicit seed 1001.
 - Corpus seed: 20260818.
 - Stages: 10 records, then 50 records.
@@ -73,3 +73,9 @@ Calibration 5 adds an explicit top-level Ollama `think: false` request and recor
 The response-mode correction worked. Qwen 3.6 reached directory EOF and read all ten records, then emitted the schema-invalid `{"action":"close","fd":5}`. The runner treated this model-originated error as an infrastructure exception and ended the run before an answer.
 
 Calibration 6 changes that boundary. Invalid JSON or an invalid top-level action is logged as `model_action_rejected` with `syscall: null`, returned to the same context, and charged against the ordinary step limit. It never reaches the adapter. This permits observable bounded self-repair without silently normalizing model output. Qwen 3.6, non-thinking mode, temperature 0, and all task conditions remain fixed; the explicit seed advances to 1006.
+
+## Response-cap calibration after run 6
+
+Calibration 6 passed the full 10-file protocol. At 50 files, Qwen 3.6 observed EOF, read all 50 records, closed its descriptors, and then exhausted every remaining call on JSON answers truncated at the 128-token response limit. The run recorded 16 `done_reason: length` responses. Peak live context was 66.2%, so the input context was not exhausted.
+
+Calibration 7 raises `num_predict` to 512 and rejects retrieval configurations below that value before a run begins. The larger cap accommodates the fixed worst-stage answer while non-thinking mode bounds ordinary actions. Model, task, corpus, adapter, scoring, action budget, temperature, and isolation remain unchanged. The explicit seed advances to 1007. This correction is calibration-derived, so the run remains excluded from Pilot 1.

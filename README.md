@@ -51,10 +51,11 @@ Scientific runs refuse to start unless the relevant apparatus files are clean an
 
 ```sh
 make build
-HAMMER_SEED=1001 OLLAMA_HOST=http://ollama.example:11434 python3 retrieval.py
+HAMMER_SEED=1007 HAMMER_NUM_PREDICT=512 OLLAMA_MODEL=qwen3.6:35b \
+  OLLAMA_HOST=http://ollama.example:11434 python3 retrieval.py
 ```
 
-The default corpus seed is `20260818`. Sampling seed is mandatory. Calibration defaults to temperature 0; Pilot 1 repetitions will use an explicitly frozen sampling policy and distinct recorded seeds. The current 10% step margin is measured against a primitive exhaustive scan. Sizes above 50 remain provisional until this calibration establishes action and context growth.
+The default corpus seed is `20260818`. Sampling seed is mandatory, and retrieval calibration refuses a response cap below 512 tokens because the ten-name 50-file answer does not fit in 128. Calibration defaults to temperature 0; Pilot 1 repetitions will use an explicitly frozen sampling policy and distinct recorded seeds. The current 10% step margin is measured against a primitive exhaustive scan. Sizes above 50 remain provisional until this calibration establishes action and context growth.
 
 Run the model-independent reference client with:
 

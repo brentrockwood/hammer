@@ -48,6 +48,12 @@ Calibration 5 confirmed the response transport and reached explicit directory EO
 
 That was an incorrect failure classification. Model-originated syntax and top-level schema errors are now recorded as rejected actions with `syscall: null`, returned to the same context for possible repair, and bounded by the existing step limit. The runner does not normalize or execute them. A unit test requires one invalid close action to be rejected and a following valid answer to complete normally. Calibration 6 keeps Qwen 3.6 and all task conditions fixed, with seed 1006.
 
+## Response capacity
+
+Calibration 6 passed every 10-file check. At 50 files, Qwen 3.6 observed EOF, read all 50 records, and closed its descriptors. Its ten-name answer could not fit in 128 output tokens. Sixteen consecutive attempts ended with `done_reason: length`, were recorded as rejected JSON, and exhausted the step budget. Peak live context was 66.2%; input context was not the cause.
+
+Retrieval calibration now requires `num_predict` of at least 512. Calibration 7 changes only that response cap and the explicit seed, now 1007. Qwen 3.6 remains in non-thinking mode and all experimental-world, task, corpus, scoring, and action-budget conditions remain fixed.
+
 ## Remaining boundaries
 
 The log is complete at the adapter boundary, not a kernel-wide trace. The hidden startup open of `/work`, container runtime setup, and host activity are outside the model action trajectory. The protocol is ASCII and caps a single read or directory request at 4096 bytes. The adapter does not expose directory creation, renaming, deletion, execution, or compilation. These are intentional Pilot 1 constraints, not general operating-system semantics.
