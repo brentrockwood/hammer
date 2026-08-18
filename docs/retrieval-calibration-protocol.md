@@ -49,3 +49,9 @@ Pilot 1 sizes above 50 will be selected only after examining measured model call
 Calibration 1 failed at both stages. At 10 records the model completed the exhaustive scan but removed filename suffixes in its answer. At 50 it selected a 32-byte `getdents64` buffer, consumed the filtered dot entries, encountered `EINVAL` when a real entry did not fit, and stopped without reading corpus files. Neither failure involved context pressure.
 
 Before calibration 2, opaque filenames lose the semantically unnecessary `.txt` suffix. The action grammar now gives 4096 as the concrete directory count and states the accepted 512–4096 range. Adapter validation failures explicitly record `syscall: null` rather than claiming that a syscall ran. Calibration 2 uses temperature 0 and seed 1002. These changes are informed by calibration 1, so both runs remain excluded from Pilot 1.
+
+## Model-capacity calibration after run 2
+
+Calibration 2 removed the buffer confound but the 7B model enumerated both directories and answered without reading any record. It used only 4 of 39 allowed calls at 10 records and 6 of 171 at 50, with no adapter error or context pressure. The fixed reference client still completed both tasks.
+
+Calibration 3 therefore changes the model only, from installed `qwen2.5:7b-instruct` Q4_K_M to installed `qwen2.5:72b-instruct-q4_K_M`. Holding the Qwen 2.5 family while changing parameter scale gives a cleaner apparatus-capability check than simultaneously moving to a different model generation. Temperature remains 0; the explicit seed is 1003. Corpus seed, stages, task text, action budget, adapter, and scoring remain those of calibration 2. This model choice and its outcome are calibration-derived and excluded from Pilot 1.

@@ -24,6 +24,12 @@ The frozen image revision `7feb738761f1d15135fe69e4b7fae62b9eb667f0` passed its 
 
 This exposed two task-irrelevant degrees of freedom. The next revision removes the filename suffix and makes the accepted directory buffer contract explicit: the prompt shows 4096, and the adapter accepts 512 through 4096. It also distinguishes schema rejection from kernel execution by emitting `syscall: null` for the former. A second calibration will use seed 1002 and a new frozen revision.
 
+## Second model-backed calibration and model selection
+
+Revision `9d31b82061d58a44437537d0f1ab56e282f7e50b` removed the first run's two confounders and again passed the complete reference scan. Calibration run `retrieval-calibration-20260818T220424Z` reached directory EOF at both sizes without an adapter error, but the 7B model returned `[""]` without reading a record. The run used only a small fraction of its action and context budgets. It was committed with human commentary before the next decision.
+
+The installed serving set includes a same-family `qwen2.5:72b-instruct-q4_K_M`. Calibration 3 will change only model scale and sampling seed: 72B Q4_K_M at temperature 0 and seed 1003. Task, corpus seed, stages, prompt, adapter, budget, and scoring stay fixed. This is a capacity check for apparatus readiness, not a model comparison claimed as a Pilot 1 result.
+
 ## Remaining boundaries
 
 The log is complete at the adapter boundary, not a kernel-wide trace. The hidden startup open of `/work`, container runtime setup, and host activity are outside the model action trajectory. The protocol is ASCII and caps a single read or directory request at 4096 bytes. The adapter does not expose directory creation, renaming, deletion, execution, or compilation. These are intentional Pilot 1 constraints, not general operating-system semantics.
