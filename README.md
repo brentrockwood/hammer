@@ -1,6 +1,12 @@
 # Hammer
 
-A minimal pre-funding apparatus spike for an agent-designed OS experiment.
+Hammer is an experimental apparatus for studying whether language-model agents construct useful higher-level capabilities from minimal computational primitives. The larger question is whether an inventory of explicitly supplied tools describes the agent's effective capability surface, or whether ordinary operations can be composed into persistent state, working conventions, indexes, protocols, and eventually executable tools that the system designer did not provide.
+
+The project keeps that question deliberately narrow. It does not assume that useful structures will emerge, and it does not treat every file an agent leaves behind as a tool. Hammer records the model's complete adapter-visible action trajectory and filesystem lineage so that construction, use, reuse, and failure can be examined rather than inferred from the final answer alone.
+
+The initial research pilot is being designed around one difficult, long-running goal in which external intermediate state could help the model's current objective without being requested by the prompt. A later experiment will study agents that know their environment will outlive the current context. See the [research overview](docs/research-overview.md) for the premise, scope, questions, and safety relevance.
+
+## Apparatus
 
 `agent` is a static binary in a `scratch` image. It exposes five JSON-line operations backed by one Linux filesystem syscall apiece: confined `openat` actions use `openat2`; the others use `read`, `write`, `close`, and `getdents64`. There is no shell, compiler, package manager, init process, or userspace utility in the experimental image. The root filesystem is read-only, all capabilities are dropped, and model-controlled paths are restricted beneath `/work` without following symbolic links.
 
@@ -79,6 +85,7 @@ Pilot runs use a dedicated AMD Strix Halo system with 128 GB unified memory. The
 
 ## Protocol notes
 
+- [Research overview](docs/research-overview.md)
 - [Pilot readiness criteria](docs/pilot-readiness.md)
 - [2026-08-18 Pilot 1 direction correction](docs/pilot-1-direction-20260818.md)
 - [Retrieval calibration protocol](docs/retrieval-calibration-protocol.md)

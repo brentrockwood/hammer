@@ -5,11 +5,12 @@ This repository is an experimental apparatus and a publication record. Preserve 
 ## Read before changing anything
 
 1. `README.md`
-2. `docs/calibration-summary-20260818.md`
-3. `docs/pilot-1-direction-20260818.md`
-4. `docs/pilot-readiness.md`
-5. `docs/retrieval-calibration-protocol.md`
-6. The human report and JSONL trajectory for the most recent run under `runs/`
+2. `docs/research-overview.md`
+3. `docs/calibration-summary-20260818.md`
+4. `docs/pilot-1-direction-20260818.md`
+5. `docs/pilot-readiness.md`
+6. `docs/retrieval-calibration-protocol.md`
+7. The human report and JSONL trajectory for the most recent run under `runs/`
 
 The consolidated calibration summary explains why each apparently odd constraint exists. Do not remove one without reading the failed run that motivated it.
 
@@ -45,7 +46,7 @@ The consolidated calibration summary explains why each apparently odd constraint
 - Every actual run gets a human Markdown report and a machine JSONL trajectory. Human commentary should state the question, attempt, result, surprise, and interpretation boundary.
 - Commit and push a run before changing the apparatus in response to it. Use a separate commit for the subsequent apparatus change.
 - Stage files explicitly. Do not use `git add -A`.
-- `spontaneous-tool-creation-concept-note.pdf` is an untracked user-owned file. Do not stage, modify, move, or delete it.
+- When present locally, `notes/spontaneous-tool-creation-concept-note.pdf` is the user-owned source concept note. The global Git ignore rule for `notes/` keeps it local. Read it when research framing needs source context; do not stage, modify, move, or delete it.
 - Remote: `https://github.com/brentrockwood/hammer`, branch `main`.
 
 ## Frozen-source workflow
