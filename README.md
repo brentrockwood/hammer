@@ -22,9 +22,11 @@ Or choose another installed Ollama model:
 OLLAMA_HOST=http://ollama.example:11434 OLLAMA_MODEL=qwen3.6:35b python3 harness.py
 ```
 
+The harness explicitly requests a 32,768-token context, a 128-token maximum response, and temperature 0. Override these with `HAMMER_NUM_CTX`, `HAMMER_NUM_PREDICT`, and `HAMMER_TEMPERATURE`. Every model turn records Ollama's native input/output token counts, timing fields, done reason, live-context estimate, and context utilization. Each task summary distinguishes peak live context from cumulative token processing.
+
 Each execution writes a complete JSONL trajectory under `logs/`: raw model responses, the action selected, the adapter request, and its syscall result. `harness.py` is outside the experimental world; it is the fixture/harness boundary rather than an accidental container service.
 
-Every execution now writes two records in parallel. Raw logs under `logs/` include local paths and endpoint details and remain ignored by Git. Publication records under `runs/` omit local infrastructure but preserve the prompts, model responses, syscall requests/results, timing, apparatus commit, image identity, generation boundaries, and explicit pass/fail checks. Each reviewed experiment gets its own commit and push.
+Every execution now writes three records. Raw JSONL under `logs/` includes local paths and endpoint details and remains ignored by Git. Publication JSONL under `runs/` omits local infrastructure but preserves the prompts, model responses, syscall requests/results, timing, apparatus commit, image identity, generation boundaries, and explicit pass/fail checks. A companion Markdown report explains the question, method, result, measurements, anomalies, and interpretation boundary for a human reader. Each reviewed experiment gets its own commit and push.
 
 ## Initial task
 
@@ -40,3 +42,7 @@ python3 persistence.py
 ```
 
 The local persisted fixture is retained under ignored `.work/` state for post-run inspection. The experimental image still contains no compiler or general-purpose userspace.
+
+## Model-serving environment
+
+Pilot runs use a dedicated AMD Strix Halo system with 128 GB unified memory. The controlled Ollama environment permits one loaded model and one request at a time, uses the model's native 32K context, retains `f16` KV-cache precision, and enables Flash Attention. The public environment settings are recorded in `infrastructure/ollama-experiment.env`; each run additionally records the live Ollama version, model digest, advertised and loaded contexts, and loaded VRAM allocation.
