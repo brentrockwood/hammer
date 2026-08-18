@@ -88,6 +88,7 @@ Pilot runs use a dedicated AMD Strix Halo system with 128 GB unified memory. The
 - [Research overview](docs/research-overview.md)
 - [Pilot readiness criteria](docs/pilot-readiness.md)
 - [2026-08-18 Pilot 1 direction correction](docs/pilot-1-direction-20260818.md)
+- [Future VM execution and escape-canary design](docs/vm-execution-design.md)
 - [Retrieval calibration protocol](docs/retrieval-calibration-protocol.md)
 - [2026-08-18 apparatus hardening record](docs/apparatus-hardening-20260818.md)
 - [2026-08-18 calibration summary and readiness decision](docs/calibration-summary-20260818.md)

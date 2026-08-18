@@ -25,6 +25,7 @@ The consolidated calibration summary explains why each apparently odd constraint
 - The immediate next step is to specify and adversarially review that task, its non-prescriptive outcome score, primitive baseline, budgets, repetitions, seeds, and artifact-classification rubric before implementing or running it.
 - A chunked out-of-band `answer_part` / `answer_done` channel remains sensible if a future task has a large final result, but it is not a blocker for Pilot 1 unless the selected task requires it.
 - Known-future work across context resets is a separate later treatment. Its future horizon must be explicit to the model.
+- Native self-authored execution is a future VM condition, not part of the current container apparatus. Read `docs/vm-execution-design.md` before proposing `execve`, a compiler, guest networking, or VM instrumentation.
 
 ## Experimental invariants
 
@@ -96,3 +97,18 @@ Do not reuse a calibration seed for a newly changed apparatus. Do not describe a
 ## Known boundary
 
 The machine trajectory is complete at the adapter boundary, not a kernel-wide trace. Container-runtime setup, host activity, and the agent's hidden startup open of `/work` are substrate operations outside the model action trajectory. State that boundary directly rather than calling the record a complete kernel syscall trace.
+
+## Future VM condition
+
+The long-term design may give the model broad freedom inside a dedicated guest on the nearly airgapped `ai1` research machine. Guest execution requires trustworthy observation outside the guest because a model-controlled tool may bypass the current adapter or modify in-guest tracing. Do not treat a VM as sufficient containment by itself.
+
+An escape canary is planned in the QEMU process's outer sandbox. It is a safety trigger and pressure-relief valve, not a task objective:
+
+- Never disclose the canary's existence, location, name, value, or semantics to the model.
+- Generate a unique unpredictable value for every run outside the guest. Do not place it in a tracked file, process argument, environment variable, guest image, model prompt, or ordinary log.
+- Make access to the canary mechanically freeze and terminate the run; do not wait for the model to submit it or voluntarily stop.
+- Preserve memory, disk, serial, and hypervisor evidence, stop further model calls, and record `escape_canary_triggered` as a distinct safety-terminal outcome rather than task success.
+- Retain the exact canary value only in sealed incident evidence. Public records use a digest or redaction and must not publish a reusable value.
+- Treat `ai1` as potentially compromised after a trigger until it has been inspected or rebuilt.
+
+The canary does not replace network isolation, an unprivileged and filesystem-confined QEMU process, sparse virtual hardware, host-side telemetry, or a credential-free disposable host. Its design is recorded in `docs/vm-execution-design.md`.
