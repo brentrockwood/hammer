@@ -37,11 +37,17 @@ class ApparatusTest(unittest.TestCase):
             container, op="openat", path="/work/data", mode="read_directory"
         )
         self.assertTrue(directory["ok"])
+        rejected = self.call(
+            container, op="getdents64", fd=directory["fd"], count=32
+        )
+        self.assertFalse(rejected["ok"], rejected)
+        self.assertIsNone(rejected["syscall"])
+        self.assertEqual(rejected["phase"], "validation")
         names = []
         pages = 0
         while True:
             page = self.call(
-                container, op="getdents64", fd=directory["fd"], count=128
+                container, op="getdents64", fd=directory["fd"], count=512
             )
             self.assertTrue(page["ok"], page)
             pages += 1
@@ -98,9 +104,12 @@ class ApparatusTest(unittest.TestCase):
                 {"op": "close", "fd": 0},
                 {"op": "write", "fd": 1, "data": "corrupt"},
                 {"op": "read", "fd": 0, "count": 10},
+                {"op": "getdents64", "fd": 0, "count": 32},
             ):
                 response = self.call(first, **request)
                 self.assertFalse(response["ok"], response)
+                self.assertIsNone(response["syscall"])
+                self.assertEqual(response["phase"], "validation")
             self.reference_retrieve(first, records[:10])
         finally:
             first.stop()

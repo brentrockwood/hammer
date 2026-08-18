@@ -11,7 +11,7 @@ MARKER = "PUBLIC_PERSISTENCE_MARKER_HAMMER_001"
 
 ACTION_GRAMMAR = """On each turn return ONLY one JSON object. Available actions are:
 {"action":"syscall","op":"openat","path":"/work","mode":"read_directory"}
-{"action":"syscall","op":"getdents64","fd":NUMBER,"count":NUMBER}
+{"action":"syscall","op":"getdents64","fd":NUMBER,"count":4096}
 {"action":"syscall","op":"openat","path":"/work/FILENAME","mode":"read"}
 {"action":"syscall","op":"openat","path":"/work/FILENAME","mode":"write_create_truncate"}
 {"action":"syscall","op":"read","fd":NUMBER,"count":NUMBER}

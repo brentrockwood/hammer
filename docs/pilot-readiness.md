@@ -5,7 +5,7 @@ The first retrieval pilot should not begin merely because the model can complete
 Before freezing Pilot 1, we require the following:
 
 - directory enumeration continues across multiple `getdents64` pages and reaches EOF;
-- each exposed action corresponds to exactly one recorded filesystem syscall;
+- each accepted action corresponds to exactly one recorded filesystem syscall, while validation rejections explicitly record that no syscall ran;
 - every model-controlled path is confined beneath `/work`;
 - the control-channel descriptors cannot be read, written, or closed by the model;
 - quoted text, backslashes, tabs, and newlines survive a write/read round trip;

@@ -98,7 +98,12 @@ static void fail_named(const char *op, const char *syscall_name, int error) {
   fputs("\"}\n", stdout);
 }
 
-static void fail(const char *op, int error) { fail_named(op, op, error); }
+static void reject(const char *op, int error) {
+  printf("{\"ok\":false,\"op\":\""); json_bytes(op, strlen(op));
+  printf("\",\"syscall\":null,\"phase\":\"validation\",\"errno\":%d,\"error\":\"", error);
+  const char *message = strerror(error); json_bytes(message, strlen(message));
+  fputs("\"}\n", stdout);
+}
 
 static int relative_work_path(const char *path, char *relative, size_t cap) {
   if (strcmp(path, "/work") == 0 || strcmp(path, "/work/") == 0) {
@@ -130,10 +135,10 @@ static int tracked_fd(long fd, enum fd_kind expected) {
 
 static void handle_openat(const char *line) {
   char path[LINE], relative[LINE], mode[64] = "read";
-  if (!string_field(line, "path", path, sizeof path)) { fail("openat", EINVAL); return; }
+  if (!string_field(line, "path", path, sizeof path)) { reject("openat", EINVAL); return; }
   const char *mode_value = value_start(line, "mode");
-  if (mode_value && !string_field(line, "mode", mode, sizeof mode)) { fail("openat", EINVAL); return; }
-  if (!relative_work_path(path, relative, sizeof relative)) { fail("openat", EPERM); return; }
+  if (mode_value && !string_field(line, "mode", mode, sizeof mode)) { reject("openat", EINVAL); return; }
+  if (!relative_work_path(path, relative, sizeof relative)) { reject("openat", EPERM); return; }
 
   struct open_how how = {
     .resolve = RESOLVE_BENEATH | RESOLVE_NO_MAGICLINKS | RESOLVE_NO_SYMLINKS,
@@ -146,11 +151,11 @@ static void handle_openat(const char *line) {
   } else if (!strcmp(mode, "write_create_truncate")) {
     how.flags = O_WRONLY | O_CREAT | O_TRUNC;
     how.mode = 0644; kind = FD_WRITE;
-  } else { fail("openat", EINVAL); return; }
+  } else { reject("openat", EINVAL); return; }
 
   long fd = syscall(SYS_openat2, work_fd, relative, &how, sizeof how);
   if (fd < 0) { fail_named("openat", "openat2", errno); return; }
-  if (fd >= MAX_FDS) { syscall(SYS_close, fd); fail("openat", EMFILE); return; }
+  if (fd >= MAX_FDS) { syscall(SYS_close, fd); reject("openat", EMFILE); return; }
   fd_kinds[fd] = kind;
   printf("{\"ok\":true,\"op\":\"openat\",\"syscall\":\"openat2\",\"fd\":%ld,\"mode\":\"", fd);
   json_bytes(mode, strlen(mode)); fputs("\"}\n", stdout);
@@ -158,10 +163,10 @@ static void handle_openat(const char *line) {
 
 static void handle_read(const char *line) {
   long fd = number_field(line, "fd", -1), count = number_field(line, "count", 4096);
-  if (!tracked_fd(fd, FD_READ)) { fail("read", EBADF); return; }
-  if (count < 1 || count > 4096) { fail("read", EINVAL); return; }
+  if (!tracked_fd(fd, FD_READ)) { reject("read", EBADF); return; }
+  if (count < 1 || count > 4096) { reject("read", EINVAL); return; }
   char buffer[4096]; long n = syscall(SYS_read, fd, buffer, (size_t)count);
-  if (n < 0) { fail("read", errno); return; }
+  if (n < 0) { fail_named("read", "read", errno); return; }
   printf("{\"ok\":true,\"op\":\"read\",\"syscall\":\"read\",\"n\":%ld,\"data\":\"", n);
   json_bytes(buffer, (size_t)n); fputs("\"}\n", stdout);
 }
@@ -169,36 +174,36 @@ static void handle_read(const char *line) {
 static void handle_write(const char *line) {
   long fd = number_field(line, "fd", -1);
   char data[LINE];
-  if (!tracked_fd(fd, FD_WRITE)) { fail("write", EBADF); return; }
-  if (!string_field(line, "data", data, sizeof data)) { fail("write", EINVAL); return; }
+  if (!tracked_fd(fd, FD_WRITE)) { reject("write", EBADF); return; }
+  if (!string_field(line, "data", data, sizeof data)) { reject("write", EINVAL); return; }
   size_t count = strlen(data); long n = syscall(SYS_write, fd, data, count);
-  if (n < 0) fail("write", errno);
+  if (n < 0) fail_named("write", "write", errno);
   else printf("{\"ok\":true,\"op\":\"write\",\"syscall\":\"write\",\"n\":%ld}\n", n);
 }
 
 static void handle_close(const char *line) {
   long fd = number_field(line, "fd", -1);
-  if (fd < 0 || fd >= MAX_FDS || fd_kinds[fd] == FD_NONE) { fail("close", EBADF); return; }
+  if (fd < 0 || fd >= MAX_FDS || fd_kinds[fd] == FD_NONE) { reject("close", EBADF); return; }
   long rc = syscall(SYS_close, fd);
-  if (rc < 0) { fail("close", errno); return; }
+  if (rc < 0) { fail_named("close", "close", errno); return; }
   fd_kinds[fd] = FD_NONE;
   printf("{\"ok\":true,\"op\":\"close\",\"syscall\":\"close\",\"fd\":%ld}\n", fd);
 }
 
 static void handle_getdents64(const char *line) {
   long fd = number_field(line, "fd", -1), count = number_field(line, "count", 4096);
-  if (!tracked_fd(fd, FD_DIRECTORY)) { fail("getdents64", EBADF); return; }
-  if (count < 24 || count > 4096) { fail("getdents64", EINVAL); return; }
+  if (!tracked_fd(fd, FD_DIRECTORY)) { reject("getdents64", EBADF); return; }
+  if (count < 512 || count > 4096) { reject("getdents64", EINVAL); return; }
   char buffer[4096]; long n = syscall(SYS_getdents64, fd, buffer, (size_t)count);
-  if (n < 0) { fail("getdents64", errno); return; }
+  if (n < 0) { fail_named("getdents64", "getdents64", errno); return; }
 
   for (long offset = 0; offset < n;) {
-    if (offset + 19 > n) { fail("getdents64", EIO); return; }
+    if (offset + 19 > n) { fail_named("getdents64", "getdents64", EIO); return; }
     unsigned short record_length;
     memcpy(&record_length, buffer + offset + 16, sizeof record_length);
-    if (record_length < 19 || offset + record_length > n) { fail("getdents64", EIO); return; }
+    if (record_length < 19 || offset + record_length > n) { fail_named("getdents64", "getdents64", EIO); return; }
     size_t name_space = (size_t)record_length - 19;
-    if (strnlen(buffer + offset + 19, name_space) == name_space) { fail("getdents64", EIO); return; }
+    if (strnlen(buffer + offset + 19, name_space) == name_space) { fail_named("getdents64", "getdents64", EIO); return; }
     offset += record_length;
   }
 
@@ -222,7 +227,7 @@ int main(void) {
   char line[LINE];
   setvbuf(stdout, NULL, _IONBF, 0);
   work_fd = (int)syscall(SYS_openat, AT_FDCWD, "/work", O_RDONLY | O_DIRECTORY, 0);
-  if (work_fd < 0) { fail("bootstrap_openat", errno); return 1; }
+  if (work_fd < 0) { fail_named("bootstrap_openat", "openat", errno); return 1; }
 
   while (fgets(line, sizeof line, stdin)) {
     char op[64];

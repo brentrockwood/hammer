@@ -62,7 +62,7 @@ Run the model-independent reference client with:
 make test
 ```
 
-It performs complete 10- and 50-record scans with deliberately small directory pages, verifies EOF pagination and exact retrieval, exercises JSON escaping, rejects path and symlink escapes, protects the control descriptors, and inspects the live container isolation settings.
+It performs complete 10- and 50-record scans with valid 512-byte directory pages, verifies EOF pagination and exact retrieval, exercises JSON escaping, rejects path and symlink escapes, protects the control descriptors, and inspects the live container isolation settings. Schema rejections explicitly report that no syscall was executed.
 
 ## Model-serving environment
 

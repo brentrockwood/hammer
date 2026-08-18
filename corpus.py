@@ -39,7 +39,7 @@ def generate_corpus(count, seed):
         labels.extend(block)
     filenames = []
     while len(filenames) < count:
-        candidate = f"r-{filename_rng.getrandbits(80):020x}.txt"
+        candidate = f"r-{filename_rng.getrandbits(80):020x}"
         if candidate not in filenames:
             filenames.append(candidate)
     records = []

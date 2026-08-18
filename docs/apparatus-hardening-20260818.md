@@ -18,6 +18,12 @@ The static agent compiled with `-Wall -Wextra -Werror`. A scripted client comple
 
 These checks validate the apparatus path, not model behavior. The source-revision image check and the model-backed 10/50 calibration remain to be performed after this apparatus commit is frozen. Their exact commands, source and image identities, run records, and outcomes will be appended rather than inferred in advance.
 
+## First model-backed calibration
+
+The frozen image revision `7feb738761f1d15135fe69e4b7fae62b9eb667f0` passed its source-label check. Calibration run `retrieval-calibration-20260818T220009Z`, using temperature 0, sampling seed 1001, and corpus seed 20260818, failed exact scoring at both stages. At 10 records, the model exhaustively read every file and found both targets but removed their `.txt` suffixes. At 50 records, it chose a 32-byte directory buffer, reached `EINVAL` before any real entry could fit, and stopped without reading a corpus record. The public trajectory and human commentary were committed before the apparatus changed.
+
+This exposed two task-irrelevant degrees of freedom. The next revision removes the filename suffix and makes the accepted directory buffer contract explicit: the prompt shows 4096, and the adapter accepts 512 through 4096. It also distinguishes schema rejection from kernel execution by emitting `syscall: null` for the former. A second calibration will use seed 1002 and a new frozen revision.
+
 ## Remaining boundaries
 
 The log is complete at the adapter boundary, not a kernel-wide trace. The hidden startup open of `/work`, container runtime setup, and host activity are outside the model action trajectory. The protocol is ASCII and caps a single read or directory request at 4096 bytes. The adapter does not expose directory creation, renaming, deletion, execution, or compilation. These are intentional Pilot 1 constraints, not general operating-system semantics.
