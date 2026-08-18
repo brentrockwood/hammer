@@ -72,16 +72,33 @@ int main(void) {
     if (!op) { fputs("{\"ok\":false,\"error\":\"missing op\"}\n", stdout); continue; }
     if (!strcmp(op, "openat")) {
       char *path = field(line, "path");
+      char *mode = field(line, "mode");
       if (!path) { fail("openat", EINVAL); continue; }
-      long fd = syscall(SYS_openat, AT_FDCWD, path, O_RDONLY, 0);
+      int flags = O_RDONLY;
+      mode_t permissions = 0;
+      if (mode && !strcmp(mode, "write_create_truncate")) {
+        flags = O_WRONLY | O_CREAT | O_TRUNC;
+        permissions = 0644;
+      } else if (mode && strcmp(mode, "read")) {
+        fail("openat", EINVAL); continue;
+      }
+      long fd = syscall(SYS_openat, AT_FDCWD, path, flags, permissions);
       if (fd < 0) fail("openat", errno);
-      else printf("{\"ok\":true,\"op\":\"openat\",\"syscall\":\"openat\",\"fd\":%ld}\n", fd);
+      else printf("{\"ok\":true,\"op\":\"openat\",\"syscall\":\"openat\",\"fd\":%ld,\"mode\":\"%s\"}\n", fd, mode ? mode : "read");
     } else if (!strcmp(op, "read")) {
       long fd = number(line, "fd", -1), count = number(line, "count", 4096);
       if (count < 1 || count > 4096) { fail("read", EINVAL); continue; }
       char buf[4097]; long n = syscall(SYS_read, fd, buf, (size_t)count);
       if (n < 0) fail("read", errno);
       else { buf[n] = 0; printf("{\"ok\":true,\"op\":\"read\",\"syscall\":\"read\",\"n\":%ld,\"data\":\"", n); json_string(buf); fputs("\"}\n", stdout); }
+    } else if (!strcmp(op, "write")) {
+      long fd = number(line, "fd", -1);
+      char *data = field(line, "data");
+      if (!data) { fail("write", EINVAL); continue; }
+      size_t count = strlen(data);
+      long n = syscall(SYS_write, fd, data, count);
+      if (n < 0) fail("write", errno);
+      else printf("{\"ok\":true,\"op\":\"write\",\"syscall\":\"write\",\"n\":%ld}\n", n);
     } else if (!strcmp(op, "close")) {
       long fd = number(line, "fd", -1), rc = syscall(SYS_close, fd);
       if (rc < 0) fail("close", errno);
