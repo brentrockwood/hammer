@@ -56,4 +56,4 @@ Retrieval calibration now requires `num_predict` of at least 512. Calibration 7 
 
 ## Remaining boundaries
 
-The log is complete at the adapter boundary, not a kernel-wide trace. The hidden startup open of `/work`, container runtime setup, and host activity are outside the model action trajectory. The protocol is ASCII and caps a single read or directory request at 4096 bytes. The adapter does not expose directory creation, renaming, deletion, execution, or compilation. These are intentional Pilot 1 constraints, not general operating-system semantics.
+The log is complete at the adapter boundary, not a kernel-wide trace. The hidden startup open of `/work`, container runtime setup, and host activity are outside the model action trajectory. The protocol is ASCII and caps a single read or directory request at 4096 bytes. The adapter does not expose directory creation, renaming, deletion, execution, or compilation. These are properties of the calibrated apparatus, not yet frozen Pilot 1 constraints and not general operating-system semantics.

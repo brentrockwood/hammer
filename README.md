@@ -32,16 +32,16 @@ Every execution now writes three records. Raw JSONL under `logs/` includes local
 
 The image seeds `/work/message` with the deliberately public value `PUBLIC_TEST_VALUE_HAMMER_001`. The model is told only that the value is in a file somewhere under `/work`; the expected path is discovery through `getdents64`, followed by `openat` and `read`.
 
-## Persistence/restart experiment
+## Persistence/restart apparatus check
 
-The persistence experiment gives two sequential containers the same host-created `/work` fixture while giving each generation a fresh model context. Generation 1 creates a marker through `openat`, `write`, and `close`; its container is destroyed. Generation 2 starts in a new network-disabled container, discovers the marker through `getdents64`, and reads it back. The host verifies the exact bytes, distinct container identities, both network modes, and the final answer.
+The persistence check gives two sequential containers the same host-created `/work` fixture while giving each generation a fresh model context. Generation 1 is explicitly instructed to create a marker through `openat`, `write`, and `close`; its container is destroyed. Generation 2 starts in a new network-disabled container, discovers the marker through `getdents64`, and reads it back. The host verifies the exact bytes, distinct container identities, both network modes, and the final answer.
 
 ```sh
 make build
 python3 persistence.py
 ```
 
-The local persisted fixture is retained under ignored `.work/` state for post-run inspection. The experimental image still contains no compiler or general-purpose userspace.
+The local persisted fixture is retained under ignored `.work/` state for post-run inspection. The experimental image still contains no compiler or general-purpose userspace. This proves that state can cross a restart; because the prompt requires the marker, it is not evidence of spontaneous persistence.
 
 ## Repeated-retrieval calibration
 
@@ -55,7 +55,7 @@ HAMMER_SEED=1007 HAMMER_NUM_PREDICT=512 OLLAMA_MODEL=qwen3.6:35b \
   OLLAMA_HOST=http://ollama.example:11434 python3 retrieval.py
 ```
 
-The default corpus seed is `20260818`. Sampling seed is mandatory, and retrieval calibration refuses a response cap below 512 tokens because the ten-name 50-file answer does not fit in 128. Calibration defaults to temperature 0; Pilot 1 repetitions will use an explicitly frozen sampling policy and distinct recorded seeds. The current 10% step margin is measured against a primitive exhaustive scan. Sizes above 50 remain provisional until this calibration establishes action and context growth.
+The default corpus seed is `20260818`. Sampling seed is mandatory, and retrieval calibration refuses a response cap below 512 tokens because the ten-name 50-file answer does not fit in 128. Calibration defaults to temperature 0. The current 10% step margin is measured against a primitive exhaustive scan. Sizes above 50 remain provisional for any future retrieval study.
 
 Run the model-independent reference client with:
 
@@ -65,6 +65,14 @@ make test
 
 It performs complete 10- and 50-record scans with valid 512-byte directory pages, verifies EOF pagination and exact retrieval, exercises JSON escaping, rejects path and symlink escapes, protects the control descriptors, and inspects the live container isolation settings. Schema rejections explicitly report that no syscall was executed.
 
+## Current research direction
+
+The retrieval work calibrated the apparatus, but it also exposed an incentive error in the proposed experiment. A model given a fresh context, one independent task, and no reason to expect a successor has no reason to build infrastructure for that successor. Repeated host-side tasks do not by themselves create a model-visible future.
+
+Pilot 1 is therefore being redesigned around one difficult, long-running goal in one continuous context. The task should make interim external state useful now without asking for notes, indexes, tools, caching, or future planning. Files created during the run will be classified after the fact as required task output, ephemeral support artifacts, or persistent instrumental structure. Correct task completion remains the primary outcome; particular strategies such as exhaustive scanning or reaching directory EOF are calibration checks, not required research behavior.
+
+Known-future persistence across context resets is a separate later experiment. In that condition, the existence of future work is an explicit treatment variable rather than information available only to the experimenter. The concrete Pilot 1 task, controls, budgets, repetitions, seeds, and artifact rubric still need to be frozen before a research run.
+
 ## Model-serving environment
 
 Pilot runs use a dedicated AMD Strix Halo system with 128 GB unified memory. The controlled Ollama environment permits one loaded model and one request at a time, uses the model's native 32K context, retains `f16` KV-cache precision, and enables Flash Attention. The public environment settings are recorded in `infrastructure/ollama-experiment.env`; each run additionally records the live Ollama version, model digest, advertised and loaded contexts, and loaded VRAM allocation.
@@ -72,6 +80,7 @@ Pilot runs use a dedicated AMD Strix Halo system with 128 GB unified memory. The
 ## Protocol notes
 
 - [Pilot readiness criteria](docs/pilot-readiness.md)
+- [2026-08-18 Pilot 1 direction correction](docs/pilot-1-direction-20260818.md)
 - [Retrieval calibration protocol](docs/retrieval-calibration-protocol.md)
 - [2026-08-18 apparatus hardening record](docs/apparatus-hardening-20260818.md)
 - [2026-08-18 calibration summary and readiness decision](docs/calibration-summary-20260818.md)

@@ -40,9 +40,9 @@ The publication JSONL retains the exact task, model messages, usage reported by 
 
 ## Decision rule
 
-Passing both stages means only that the apparatus admits and observes the primitive baseline at these sizes. Failure triggers diagnosis before Pilot 1. We will not interpret artifact creation, reuse, or omission during calibration as research evidence.
+Passing both stages means only that the apparatus admits and observes the primitive baseline at these sizes. Failure triggers apparatus diagnosis. We will not interpret artifact creation, reuse, or omission during calibration as research evidence.
 
-Pilot 1 sizes above 50 will be selected only after examining measured model calls, cumulative prompt processing, peak live context, filesystem mutations, and failure modes. Pilot 1 will separately freeze its repetition count, nonzero sampling temperature, seed schedule, and stopping rules before any included run.
+This protocol does not define Pilot 1. After calibration, the research direction changed to one difficult, long-running goal in one continuous model context; see [pilot-1-direction-20260818.md](pilot-1-direction-20260818.md). Sizes above 50, a chunked answer channel, and a new sampling plan would need to be frozen only if retrieval is later studied in its own right.
 
 ## Calibration revision after run 1
 

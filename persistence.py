@@ -90,7 +90,7 @@ def main():
         question="Would state written through the syscall adapter survive the loss of both the container and the model context?",
         method="Generation 1 was explicitly instructed to write a public marker into the mounted `/work`. We destroyed that container and discarded its transcript, then started generation 2 in a distinct network-disabled container with the same `/work` and a fresh context.",
         result=f"Generation 2 independently found and reported `{second_answer}`. The host also verified the exact persisted bytes and distinct container identities.",
-        interpretation="This validates the persistence and restart fixture. Because generation 1 was told to create the marker, the result is not evidence of spontaneous memory or tool construction. That question belongs to the repeated-retrieval pilot.",
+        interpretation="This validates the persistence and restart fixture. Because generation 1 was told to create the marker, the result is not evidence of spontaneous memory or tool construction. Pilot 1 instead uses one long-running current goal; known-future persistence across context resets is a separate later treatment.",
     )
     print("PERSISTENCE RESULT:", "PASS" if passed else "FAIL")
     print("PUBLIC RECORD:", log.public_path)

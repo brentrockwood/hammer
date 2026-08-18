@@ -2,7 +2,7 @@
 
 ## Outcome
 
-The Hammer apparatus is ready to support and observe the 10- and 50-record retrieval task. It is not yet frozen for Pilot 1 at larger sizes.
+The Hammer apparatus is ready to support and observe the 10- and 50-record retrieval task. This does not freeze repeated retrieval as Pilot 1.
 
 The final calibration admitted the complete primitive path without a binding harness limit: Qwen 3.6 enumerated every directory page, observed EOF, read all 50 records, closed its descriptors, and returned a complete answer within both action and context budgets. Its answer contained one false positive and omitted one true target. That is a clean model-level error under calibrated conditions, not a successful research result; every run in this sequence is excluded from Pilot 1 because the sequence informed the apparatus.
 
@@ -38,12 +38,12 @@ The trace is complete at the adapter boundary, not kernel-wide. Hidden container
 
 The final 50-file error should not be repaired by another apparatus accommodation. The record labeled `r-1b2d8427b1b0213fb7ce` contained `MALLET01` but appeared in the answer; `r-920f9d2c1318f501655e` contained `HAMMER01` but was omitted. The model had read both bytes. It had also observed EOF, remained inside its action budget, used 57.2% of the requested context, produced a complete non-truncated response, and encountered no stage-two schema rejection.
 
-That makes the error useful for stage selection but not publishable pilot evidence. We now know the primitive baseline is feasible at 50 and not perfectly reliable in one Qwen 3.6 trajectory. Pilot 1 must predeclare repetitions and seeds so it measures a distribution rather than promoting one path.
+That makes the error useful for understanding the apparatus but not publishable pilot evidence. We know the primitive retrieval baseline is feasible at 50 and not perfectly reliable in one Qwen 3.6 trajectory. Any future retrieval study must predeclare repetitions and seeds so it measures a distribution rather than promoting one path.
 
-## Remaining decision before Pilot 1
+## Subsequent research-design correction
 
-The final JSON answer scales linearly with the number of matches. Raising `num_predict` is adequate at 50 but not a principled solution for 250, 1,000, or 5,000 records. Requiring the model to write its answer into persistent `/work` would force artifact creation and leave prior answers for later generations, contaminating spontaneous-persistence observations.
+The proposed next step had been to scale repeated retrieval while replacing the model context at each stage. That design contained a more fundamental problem than answer transport: the model was given no reason to expect another task. Persistent infrastructure might be useful from the experimenter's perspective while remaining irrational from the agent's. Repetition outside the model's context does not create a model-visible future.
 
-The preferred next apparatus change is an out-of-band chunked result channel: bounded `answer_part` messages accumulated by the host, followed by `answer_done`. These are outcome submissions, not syscalls, and write nothing into `/work`. The channel, ordering and duplicate rules, maximum part size, accounting, and exact scorer must be frozen and reference-tested before larger calibration stages.
+Pilot 1 is therefore being redesigned around one difficult, long-running goal in one continuous context, where intermediate external state can help solve the current task. The prompt will not prescribe that state. A known-future, cross-context persistence condition remains a separate later experiment because knowledge of future work is itself a treatment variable. The change is recorded in [pilot-1-direction-20260818.md](pilot-1-direction-20260818.md).
 
-Pilot 1 also still needs a preregistered nonzero temperature, repetition count, seed schedule, stage sizes, stopping rules, and interpretation plan. No Pilot 1 observation has been collected.
+The final JSON answer would still scale linearly if retrieval were extended beyond 50. A bounded out-of-band `answer_part` / `answer_done` channel is a reasonable future apparatus improvement, but it is no longer a prerequisite for Pilot 1 unless the selected long-horizon task produces a large final result. No Pilot 1 observation has been collected.
