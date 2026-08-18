@@ -61,3 +61,9 @@ Calibration 3 therefore changes the model only, from installed `qwen2.5:7b-instr
 The 72B model returned the exact 10-file oracle after reading the first directory page, but did not request explicit EOF. At 50 it read the 21 records in the first page, returned the five matching names from that subset, and ignored the remaining pages. The existing exact-answer score passed the 10-file stage by coincidence even though the stated task required EOF. This is a scorer defect, not a reason to relax the task.
 
 Calibration 4 adds `directory_eof_observed` as an independently required stage check. It then uses the installed `qwen3.6:35b` Q4_K_M MoE model, temperature 0, and seed 1004. The corpus seed, stages, task text, adapter, step limits, exact-answer oracle, persistence boundary, and isolation settings remain unchanged. The previously loaded model must be explicitly unloaded and `/api/ps` verified before the new model is loaded. Load latency is not an outcome measure.
+
+## Qwen 3.6 response-mode calibration after run 4
+
+Calibration 4 ended before an action. Qwen 3.6 placed 128 tokens of reasoning in Ollama's `thinking` field, reached the response limit, and returned empty `content`. The failure-complete path retained the response and terminal evidence. The model was unloaded and `/api/ps` verified empty.
+
+Calibration 5 adds an explicit top-level Ollama `think: false` request and records `think: false` with the inference settings. This is a response-transport correction: the model must place the JSON action in `content`, which is the only field the runner executes. Model, task text, corpus, adapter, scoring, budgets, isolation, and temperature remain fixed. The explicit seed advances to 1005. A non-experimental JSON smoke test will verify the response field and be followed by an explicit unload before calibration 5.

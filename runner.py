@@ -12,6 +12,18 @@ from urllib.request import Request, urlopen
 ROOT = Path(__file__).resolve().parent
 
 
+def env_bool(name, default=False):
+    value = os.environ.get(name)
+    if value is None:
+        return default
+    normalized = value.strip().lower()
+    if normalized in ("1", "true", "yes", "on"):
+        return True
+    if normalized in ("0", "false", "no", "off"):
+        return False
+    raise ValueError(f"{name} must be true or false")
+
+
 @dataclass(frozen=True)
 class Settings:
     model: str = os.environ.get("OLLAMA_MODEL", "qwen2.5:7b-instruct")
@@ -23,8 +35,9 @@ class Settings:
     seed: int | None = (
         int(os.environ["HAMMER_SEED"]) if os.environ.get("HAMMER_SEED") else None
     )
+    think: bool = env_bool("HAMMER_THINK", False)
 
-    def inference_options(self):
+    def ollama_options(self):
         options = {
             "temperature": self.temperature,
             "num_ctx": self.num_ctx,
@@ -33,6 +46,9 @@ class Settings:
         if self.seed is not None:
             options["seed"] = self.seed
         return options
+
+    def inference_options(self):
+        return {**self.ollama_options(), "think": self.think}
 
 
 def new_run_id(scenario):
@@ -226,7 +242,8 @@ class OllamaClient:
             "messages": history,
             "stream": False,
             "format": "json",
-            "options": self.settings.inference_options(),
+            "think": self.settings.think,
+            "options": self.settings.ollama_options(),
         }
         started = time.monotonic()
         data = self.request("/api/chat", payload)

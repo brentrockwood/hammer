@@ -36,6 +36,12 @@ The 72B model read every record on the first directory page in each stage. That 
 
 The next revision adds a separately required `directory_eof_observed` check without changing the task. Calibration 4 uses the installed, faster `qwen3.6:35b` Q4_K_M MoE at temperature 0 and seed 1004. The user identified this as a competent offline model. All other task and apparatus conditions remain fixed. The 72B model was explicitly unloaded, and `/api/ps` returned an empty model list before this choice was frozen.
 
+## Qwen 3.6 response transport
+
+Calibration 4 produced no executable action. Qwen 3.6 used the entire 128-token response in Ollama's separate `thinking` field, returned empty `content`, and reported `done_reason: length`. The runner retained that response, recorded the parse failure, terminated the container, and emitted `run_end`. The model was explicitly unloaded and `/api/ps` verified empty.
+
+The client now sends top-level `think: false` and records that value beside the sampling options. Only `content` is parsed or executed. Calibration 5 keeps Qwen 3.6, temperature 0, and every task condition fixed while advancing the seed to 1005. A small response-field smoke test precedes the run and is not scored as an experiment.
+
 ## Remaining boundaries
 
 The log is complete at the adapter boundary, not a kernel-wide trace. The hidden startup open of `/work`, container runtime setup, and host activity are outside the model action trajectory. The protocol is ASCII and caps a single read or directory request at 4096 bytes. The adapter does not expose directory creation, renaming, deletion, execution, or compilation. These are intentional Pilot 1 constraints, not general operating-system semantics.

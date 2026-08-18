@@ -22,7 +22,7 @@ Or choose another installed Ollama model:
 OLLAMA_HOST=http://ollama.example:11434 OLLAMA_MODEL=qwen3.6:35b python3 harness.py
 ```
 
-The harness explicitly requests a 32,768-token context, a 128-token maximum response, and temperature 0. Override these with `HAMMER_NUM_CTX`, `HAMMER_NUM_PREDICT`, and `HAMMER_TEMPERATURE`. Every model turn records Ollama's native input/output token counts, timing fields, done reason, live-context estimate, and context utilization. Each task summary distinguishes peak live context from cumulative token processing.
+The harness explicitly requests a 32,768-token context, a 128-token maximum response, temperature 0, and non-thinking output. Override these with `HAMMER_NUM_CTX`, `HAMMER_NUM_PREDICT`, `HAMMER_TEMPERATURE`, and `HAMMER_THINK`. The reasoning-mode request is recorded with the other inference settings. Every model turn records Ollama's native input/output token counts, timing fields, done reason, live-context estimate, and context utilization. Each task summary distinguishes peak live context from cumulative token processing.
 
 Each execution writes the complete adapter-visible JSONL trajectory under `logs/`: raw model responses, the action selected, the adapter request, and its syscall result. This is not a kernel-wide trace of hidden container setup. `harness.py` is outside the experimental world; it is the fixture/harness boundary rather than an accidental container service.
 
