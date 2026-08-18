@@ -2,6 +2,7 @@
 """Calibrate repeated retrieval before freezing the first research pilot."""
 import argparse
 import hashlib
+import json
 import math
 import traceback
 
@@ -43,6 +44,28 @@ def parse_args():
     parser.add_argument("--sizes", default="10,50")
     parser.add_argument("--corpus-seed", type=int, default=20260818)
     return parser.parse_args()
+
+
+def generation_observations(log, generation):
+    rows = [json.loads(line) for line in log.public_path.read_text().splitlines()]
+    results = [
+        row["result"] for row in rows
+        if row["event"] == "syscall_result" and row.get("generation") == generation
+    ]
+    directory_results = [
+        result for result in results if result.get("op") == "getdents64"
+    ]
+    return {
+        "directory_calls": len(directory_results),
+        "directory_eof_observed": any(
+            result.get("ok") is True and result.get("eof") is True
+            for result in directory_results
+        ),
+        "successful_reads": sum(
+            result.get("op") == "read" and result.get("ok") is True
+            for result in results
+        ),
+    }
 
 
 def main():
@@ -116,6 +139,7 @@ def main():
             after = snapshot_tree(work_dir)
             diff = snapshot_diff(before, after)
             exact = isinstance(answer, list) and answer == expected
+            observations = generation_observations(log, generation)
             writable_mounts = [
                 mount["destination"] for mount in identity["mounts"] if mount["rw"]
             ]
@@ -128,6 +152,7 @@ def main():
             )
             stage_checks = {
                 "exact_sorted_answer": exact,
+                "directory_eof_observed": observations["directory_eof_observed"],
                 "corpus_unchanged_by_model": not corpus_changed,
                 "network_disabled": identity["network_mode"] == "none",
                 "read_only_root": identity["read_only_root"] is True,
@@ -141,7 +166,8 @@ def main():
             log.event(
                 "stage_score", generation=generation, corpus_size=size,
                 expected_answer=expected, model_answer=answer,
-                checks=stage_checks, passed=all(stage_checks.values()),
+                observations=observations, checks=stage_checks,
+                passed=all(stage_checks.values()),
             )
             checks.update({f"stage_{size}_{key}": value for key, value in stage_checks.items()})
             stage_results.append(

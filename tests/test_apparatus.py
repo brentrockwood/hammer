@@ -5,6 +5,12 @@ import uuid
 
 from corpus import TARGET, add_records, expected_filenames, generate_corpus
 from runner import AgentContainer, ROOT
+from retrieval import generation_observations
+
+
+class FakeLog:
+    def __init__(self, path):
+        self.public_path = path
 
 
 class ApparatusTest(unittest.TestCase):
@@ -137,6 +143,27 @@ class ApparatusTest(unittest.TestCase):
             self.call(container, op="close", fd=opened["fd"])
         finally:
             container.stop()
+
+    def test_eof_observation_is_scored_separately_from_answer(self):
+        path = self.case_dir / "trajectory.jsonl"
+        rows = [
+            {"event": "syscall_result", "generation": 1,
+             "result": {"ok": True, "op": "getdents64", "eof": False}},
+            {"event": "syscall_result", "generation": 1,
+             "result": {"ok": True, "op": "read", "n": 256}},
+        ]
+        path.write_text("".join(json.dumps(row) + "\n" for row in rows))
+        observed = generation_observations(FakeLog(path), 1)
+        self.assertFalse(observed["directory_eof_observed"])
+        rows.append(
+            {"event": "syscall_result", "generation": 1,
+             "result": {"ok": True, "op": "getdents64", "eof": True}}
+        )
+        path.write_text("".join(json.dumps(row) + "\n" for row in rows))
+        observed = generation_observations(FakeLog(path), 1)
+        self.assertTrue(observed["directory_eof_observed"])
+        self.assertEqual(observed["directory_calls"], 2)
+        self.assertEqual(observed["successful_reads"], 1)
 
 
 if __name__ == "__main__":

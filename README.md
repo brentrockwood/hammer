@@ -45,7 +45,7 @@ The local persisted fixture is retained under ignored `.work/` state for post-ru
 
 ## Repeated-retrieval calibration
 
-`retrieval.py` is an apparatus calibration, not Pilot 1. It grows one persistent public corpus from 10 to 50 fixed-size records while replacing the container and model context between stages. Filenames, record labels, payloads, and creation order come from separately seeded deterministic streams. The task text is identical at both stages and asks only for an exact retrieval outcome. The host records the external answer oracle, exact score, action budget, complete before/after `/work` snapshots, agent-created artifacts, isolation state, model usage, and terminal failures.
+`retrieval.py` is an apparatus calibration, not Pilot 1. It grows one persistent public corpus from 10 to 50 fixed-size records while replacing the container and model context between stages. Filenames, record labels, payloads, and creation order come from separately seeded deterministic streams. The task text is identical at both stages and asks only for an exact retrieval outcome. The host records the external answer oracle, exact score, independently required directory-EOF observation, action budget, complete before/after `/work` snapshots, agent-created artifacts, isolation state, model usage, and terminal failures.
 
 Scientific runs refuse to start unless the relevant apparatus files are clean and the local image label names that exact Git commit. Commit the apparatus before building it:
 

@@ -55,3 +55,9 @@ Before calibration 2, opaque filenames lose the semantically unnecessary `.txt` 
 Calibration 2 removed the buffer confound but the 7B model enumerated both directories and answered without reading any record. It used only 4 of 39 allowed calls at 10 records and 6 of 171 at 50, with no adapter error or context pressure. The fixed reference client still completed both tasks.
 
 Calibration 3 therefore changes the model only, from installed `qwen2.5:7b-instruct` Q4_K_M to installed `qwen2.5:72b-instruct-q4_K_M`. Holding the Qwen 2.5 family while changing parameter scale gives a cleaner apparatus-capability check than simultaneously moving to a different model generation. Temperature remains 0; the explicit seed is 1003. Corpus seed, stages, task text, action budget, adapter, and scoring remain those of calibration 2. This model choice and its outcome are calibration-derived and excluded from Pilot 1.
+
+## EOF scoring and Qwen 3.6 calibration after run 3
+
+The 72B model returned the exact 10-file oracle after reading the first directory page, but did not request explicit EOF. At 50 it read the 21 records in the first page, returned the five matching names from that subset, and ignored the remaining pages. The existing exact-answer score passed the 10-file stage by coincidence even though the stated task required EOF. This is a scorer defect, not a reason to relax the task.
+
+Calibration 4 adds `directory_eof_observed` as an independently required stage check. It then uses the installed `qwen3.6:35b` Q4_K_M MoE model, temperature 0, and seed 1004. The corpus seed, stages, task text, adapter, step limits, exact-answer oracle, persistence boundary, and isolation settings remain unchanged. The previously loaded model must be explicitly unloaded and `/api/ps` verified before the new model is loaded. Load latency is not an outcome measure.
