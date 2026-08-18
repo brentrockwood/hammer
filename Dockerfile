@@ -7,6 +7,8 @@ RUN gcc -static -Os -s -Wall -Wextra -Werror -o agent agent.c
 
 # Intentionally no shell, libc userspace, package manager, or compiler.
 FROM scratch
+ARG HAMMER_COMMIT=unknown
+LABEL org.opencontainers.image.revision=$HAMMER_COMMIT
 COPY --from=build /src/agent /agent
 COPY fixtures/work /work
 ENTRYPOINT ["/agent"]

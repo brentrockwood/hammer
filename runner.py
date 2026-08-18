@@ -20,13 +20,19 @@ class Settings:
     temperature: float = float(os.environ.get("HAMMER_TEMPERATURE", "0"))
     num_ctx: int = int(os.environ.get("HAMMER_NUM_CTX", "32768"))
     num_predict: int = int(os.environ.get("HAMMER_NUM_PREDICT", "128"))
+    seed: int | None = (
+        int(os.environ["HAMMER_SEED"]) if os.environ.get("HAMMER_SEED") else None
+    )
 
     def inference_options(self):
-        return {
+        options = {
             "temperature": self.temperature,
             "num_ctx": self.num_ctx,
             "num_predict": self.num_predict,
         }
+        if self.seed is not None:
+            options["seed"] = self.seed
+        return options
 
 
 def new_run_id(scenario):
@@ -40,20 +46,37 @@ def git_commit():
     ).strip()
 
 
-def tracked_worktree_dirty():
+APPARATUS_PATHS = (
+    ".dockerignore", "Dockerfile", "compose.yaml", "Makefile", "agent.c", "runner.py",
+    "harness.py", "persistence.py", "retrieval.py", "corpus.py", "tests",
+    "fixtures", "infrastructure",
+)
+
+
+def apparatus_worktree_status():
     result = subprocess.run(
-        ["git", "status", "--porcelain", "--untracked-files=no"],
+        ["git", "status", "--porcelain", "--untracked-files=all", "--",
+         *APPARATUS_PATHS],
         cwd=ROOT, text=True, capture_output=True, check=True,
     )
-    return bool(result.stdout.strip())
+    return result.stdout.strip().splitlines()
 
 
-def image_id():
+def image_metadata():
     result = subprocess.run(
-        ["docker", "image", "inspect", "hammer-agent", "--format", "{{.Id}}"],
+        ["docker", "image", "inspect", "hammer-agent"],
         cwd=ROOT, text=True, capture_output=True,
     )
-    return result.stdout.strip() if result.returncode == 0 else "unavailable"
+    if result.returncode != 0:
+        return {"image_id": "unavailable", "image_revision": "unavailable"}
+    info = json.loads(result.stdout)[0]
+    labels = info.get("Config", {}).get("Labels") or {}
+    return {
+        "image_id": info.get("Id", "unavailable"),
+        "image_revision": labels.get(
+            "org.opencontainers.image.revision", "unavailable"
+        ),
+    }
 
 
 class ExperimentLog:
@@ -103,6 +126,7 @@ class ExperimentLog:
             f"- Apparatus commit: `{start.get('apparatus_commit', 'not recorded')}`",
             f"- Model: `{start.get('model', 'not recorded')}`",
             f"- Image: `{start.get('image_id', 'not recorded')}`",
+            f"- Image source revision: `{start.get('image_revision', 'not recorded')}`",
             f"- Inference options: `{json.dumps(start.get('inference_options', {}), separators=(',', ':'))}`",
             "",
             "## Measurements",
@@ -229,15 +253,37 @@ class OllamaClient:
 
 
 def apparatus_metadata(settings, client):
+    commit = git_commit()
+    dirty_paths = apparatus_worktree_status()
+    image = image_metadata()
     return {
         "schema_version": 1,
         "model": settings.model,
         "inference_options": settings.inference_options(),
         "server_environment": client.environment(),
-        "apparatus_commit": git_commit(),
-        "worktree_dirty": tracked_worktree_dirty(),
-        "image_id": image_id(),
+        "apparatus_commit": commit,
+        "worktree_dirty": bool(dirty_paths),
+        "dirty_apparatus_paths": dirty_paths,
+        **image,
+        "apparatus_frozen": not dirty_paths and image["image_revision"] == commit,
     }
+
+
+def require_frozen_apparatus(metadata):
+    if metadata.get("apparatus_frozen"):
+        return
+    raise RuntimeError(
+        "scientific runs require a clean apparatus worktree and an image built "
+        "from that exact commit; commit, then run `make build`"
+    )
+
+
+def public_error(error, settings=None):
+    """Retain useful failure text without publishing local paths or endpoints."""
+    message = str(error).replace(str(ROOT), "[REPOSITORY]")
+    if settings is not None:
+        message = message.replace(settings.ollama, "[OLLAMA_ENDPOINT]")
+    return message
 
 
 def parse_action(text):
@@ -275,6 +321,16 @@ class AgentContainer:
                 self.identity = {
                     "container_id": info["Id"],
                     "network_mode": info["HostConfig"]["NetworkMode"],
+                    "read_only_root": info["HostConfig"].get("ReadonlyRootfs"),
+                    "init": bool(info["HostConfig"].get("Init")),
+                    "mounts": [
+                        {
+                            "destination": mount.get("Destination"),
+                            "rw": mount.get("RW"),
+                            "type": mount.get("Type"),
+                        }
+                        for mount in info.get("Mounts", [])
+                    ],
                 }
                 return self
             if self.proc.poll() is not None:
@@ -295,21 +351,27 @@ class AgentContainer:
             return None
         if self.proc.stdin:
             self.proc.stdin.close()
-        return self.proc.wait(timeout=20)
+        exit_code = self.proc.wait(timeout=20)
+        if self.proc.stdout:
+            self.proc.stdout.close()
+        return exit_code
 
 
-def run_generation(log, client, generation, system_prompt, work_dir=None):
+def run_generation(
+    log, client, generation, system_prompt, work_dir=None, max_steps=None,
+):
+    step_limit = max_steps or client.settings.max_steps
     container = AgentContainer(log.run_id, generation, work_dir).start()
     log.event(
         "generation_start", generation=generation,
         model_context="fresh", system_prompt=system_prompt,
-        container=container.identity,
+        container=container.identity, max_steps=step_limit,
     )
     history = [{"role": "system", "content": system_prompt}]
     answer = None
     usages = []
     try:
-        for step in range(1, client.settings.max_steps + 1):
+        for step in range(1, step_limit + 1):
             message, usage = client.ask(history)
             model_text = message.get("content", "")
             usages.append(usage)
@@ -351,8 +413,19 @@ def run_generation(log, client, generation, system_prompt, work_dir=None):
         if answer is None:
             log.event(
                 "generation_exhausted", generation=generation,
-                max_steps=client.settings.max_steps,
+                max_steps=step_limit,
             )
+    except Exception as error:
+        log.event(
+            "generation_error", generation=generation,
+            public_fields={
+                "generation": generation,
+                "error_type": type(error).__name__,
+                "error": public_error(error, client.settings),
+            },
+            error_type=type(error).__name__, error=str(error),
+        )
+        raise
     finally:
         exit_code = container.stop()
         prompt_total = sum(item["prompt_tokens"] or 0 for item in usages)

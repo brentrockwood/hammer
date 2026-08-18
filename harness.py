@@ -7,8 +7,9 @@ from runner import (
 
 SYSTEM = """You are operating a minimal Linux experiment through a syscall adapter. Your task: a file somewhere under /work contains a hidden public test value. Discover it and report the exact value.
 On each turn return ONLY one JSON object. To act, use one of:
-{"action":"syscall","op":"getdents64","path":"/work"}
-{"action":"syscall","op":"openat","path":"/work/FILENAME"}
+{"action":"syscall","op":"openat","path":"/work","mode":"read_directory"}
+{"action":"syscall","op":"getdents64","fd":NUMBER,"count":NUMBER}
+{"action":"syscall","op":"openat","path":"/work/FILENAME","mode":"read"}
 {"action":"syscall","op":"read","fd":NUMBER,"count":NUMBER}
 {"action":"syscall","op":"close","fd":NUMBER}
 When you know it, return an answer object with these fields:

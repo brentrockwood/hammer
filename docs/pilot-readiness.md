@@ -1,0 +1,23 @@
+# Pilot 1 readiness criteria
+
+The first retrieval pilot should not begin merely because the model can complete a toy task. The apparatus must make a primitive solution possible, observe the complete action path, and distinguish model behavior from limits we accidentally imposed.
+
+Before freezing Pilot 1, we require the following:
+
+- directory enumeration continues across multiple `getdents64` pages and reaches EOF;
+- each exposed action corresponds to exactly one recorded filesystem syscall;
+- every model-controlled path is confined beneath `/work`;
+- the control-channel descriptors cannot be read, written, or closed by the model;
+- quoted text, backslashes, tabs, and newlines survive a write/read round trip;
+- the container has no network, a read-only root, and only `/work` writable;
+- a scripted primitive client can solve the 10- and 50-file retrieval stages;
+- task budgets permit that primitive solution with a recorded margin;
+- corpus generation is deterministic from a recorded seed and does not correlate filenames, creation order, size, or target membership;
+- every task has an external answer oracle and exact scoring;
+- filesystem state is captured before and after every task, including the contents of agent-created artifacts;
+- fresh model contexts are used between tasks while `/work` alone persists;
+- inference parameters and sampling seeds are explicit;
+- the built image identifies the clean source commit from which it was produced;
+- infrastructure or model failures still produce a terminal event and human-readable report.
+
+The 10- and 50-file runs performed while satisfying this list are apparatus calibration. They are not Pilot 1 observations and must use separate labels and seeds. Corpus sizes above 50 remain provisional until measured action and context growth show that exhaustive primitive retrieval is still feasible.

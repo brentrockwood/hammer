@@ -10,7 +10,8 @@ from runner import (
 MARKER = "PUBLIC_PERSISTENCE_MARKER_HAMMER_001"
 
 ACTION_GRAMMAR = """On each turn return ONLY one JSON object. Available actions are:
-{"action":"syscall","op":"getdents64","path":"/work"}
+{"action":"syscall","op":"openat","path":"/work","mode":"read_directory"}
+{"action":"syscall","op":"getdents64","fd":NUMBER,"count":NUMBER}
 {"action":"syscall","op":"openat","path":"/work/FILENAME","mode":"read"}
 {"action":"syscall","op":"openat","path":"/work/FILENAME","mode":"write_create_truncate"}
 {"action":"syscall","op":"read","fd":NUMBER,"count":NUMBER}

@@ -1,0 +1,10 @@
+.git
+.work
+__pycache__
+docs
+logs
+runs
+tests
+*.md
+*.pdf
+*.py

@@ -2,10 +2,12 @@ services:
   agent:
     build:
       context: .
+      args:
+        HAMMER_COMMIT: ${HAMMER_COMMIT:-unknown}
     network_mode: "none"
+    read_only: true
     stdin_open: true
     tty: false
-    init: true
     cap_drop:
       - ALL
     security_opt:
