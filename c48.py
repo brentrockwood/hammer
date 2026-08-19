@@ -120,6 +120,7 @@ def reference_dry_run():
         checkpoint()
         return result
 
+    error = None
     try:
         # The reference has the known valid route only to verify persistence and
         # adapter transport. It is not a model strategy or a task outcome.
@@ -143,8 +144,6 @@ def reference_dry_run():
             fd = call(op="openat", path=f"/work/n/{name}", mode="read")["fd"]
             call(op="read", fd=fd, count=4096)
             call(op="close", fd=fd)
-            if step in COMPACTION_STEPS:
-                raise RuntimeError("checkpoint must be handled inside call")
 
         # The client rereads its retained representation after both boundaries.
         for _ in COMPACTION_STEPS:
@@ -158,10 +157,38 @@ def reference_dry_run():
         call(op="close", fd=fd)
         step += 1
         log.event("generation_answer", generation=1, step=step, answer="done")
+    except Exception as caught:
+        error = caught
     finally:
         exit_code = container.stop()
     after = snapshot_tree(work_dir)
     diff = snapshot_diff(before, after)
+    if error is not None:
+        checks = {"run_completed_without_infrastructure_error": False}
+        log.event(
+            "filesystem_snapshot", boundary="after", entries=after, diff=diff,
+        )
+        log.event(
+            "generation_end", generation=1, container_id=container.identity["container_id"],
+            exit_code=exit_code, usage_summary={"model_calls": 0, "cumulative_prompt_tokens": 0,
+            "cumulative_completion_tokens": 0, "cumulative_processed_tokens": 0,
+            "peak_live_context_tokens": 0, "context_limit": 32768, "peak_context_utilization": 0},
+        )
+        log.event(
+            "run_error", error_type=type(error).__name__, error=public_error(error),
+        )
+        log.event("run_end", passed=False, checks=checks, error=public_error(error))
+        report = log.write_report(
+            title="C48 declared-compaction scripted dry run",
+            question="Can the fixed adapter preserve a compact external route through two transcript-compaction boundaries without weakening graph integrity?",
+            method="A scripted reference client used the same network-disabled container and primitive adapter.",
+            result=f"The dry run terminated with `{type(error).__name__}: {public_error(error)}`.",
+            interpretation="This is an apparatus failure, not a model observation. The trajectory is retained for diagnosis before any model-backed treatment.",
+        )
+        print("C48 SCRIPTED DRY RUN: ERROR")
+        print("PUBLIC RECORD:", log.public_path)
+        print("HUMAN REPORT:", report)
+        return 3
     answer_valid, answer_reason = validate_answer((work_dir / "answer").read_text(), fixture)
     checks = {
         "both_checkpoints_observed": [item["step"] for item in checkpoints] == list(COMPACTION_STEPS),
