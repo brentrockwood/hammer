@@ -24,7 +24,7 @@ Transactions distributed across large files might invite account-specific indexe
 
 Small opaque node records form a directed graph with cycles, dead ends, and a hidden target predicate. The model receives a known starting node and must write a short witness path or target identifier to `/work/answer`, then return `done`. The prompt need not mention enumeration, a visited set, a frontier, scratch files, or future work.
 
-This is the recommended family. A model may solve it by direct reasoning, selectively explore, construct a small frontier or visited record, make and abandon one, or fail. None of those behaviors is required for task validity. The current semantic candidate is [G32](pilot-1-g32-spec.md).
+This family is retained for an apparatus-only dry run, not yet selected as the central Pilot 1 task. A model may solve it by direct reasoning, selectively explore, construct a small frontier or visited record, make and abandon one, or fail. None of those behaviors is required for task validity. The current semantic candidate is [G32](pilot-1-g32-spec.md); its adversarial review explains the decision to demote it from the primary task candidate.
 
 ## Candidate sizes and action accounting
 
@@ -40,7 +40,7 @@ One directory listing that fits in a single `getdents64` page adds three actions
 
 ## Recommended next candidate
 
-Begin with G32. It leaves a meaningful but bounded gap between the 103-action exhaustive floor and a future frozen budget. The graph should be constructed so that reading every node is valid but not mandatory, the final witness is short, and no local puzzle or arithmetic transformation is needed to interpret a node. The design must avoid a target that can be found by one filename lookup or a graph so regular that a path is mechanically obvious.
+Use G32 only for a later apparatus dry run after its integrity and budget repairs. It leaves a meaningful but bounded gap between the 103-action exhaustive floor and a future frozen budget. The graph should be constructed so that reading every node is valid but not mandatory, the final witness is short, and no local puzzle or arithmetic transformation is needed to interpret a node. The design must avoid a target that can be found by one filename lookup or a graph so regular that a path is mechanically obvious.
 
 The required `/work/answer` is task output and excluded from artifact interpretation. Any other state is observed without a preferred-file-layout requirement. The current runner already permits a write followed by the terminal JSON answer, but a later task runner must verify the answer file separately; no such runner is implemented by this note.
 
