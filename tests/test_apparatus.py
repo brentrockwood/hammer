@@ -5,6 +5,7 @@ import uuid
 from unittest.mock import patch
 
 from corpus import TARGET, add_records, expected_filenames, generate_corpus
+from graph_task import generate_graph, validate_answer, write_fixture
 from runner import AgentContainer, ROOT, run_generation
 from retrieval import generation_observations
 
@@ -228,6 +229,17 @@ class ApparatusTest(unittest.TestCase):
         self.assertEqual(len(rejected), 1)
         self.assertIsNone(rejected[0]["rejection"]["syscall"])
         self.assertFalse(any(event["event"] == "generation_error" for event in log.events))
+
+    def test_c48_fixture_and_route_validator(self):
+        fixture = generate_graph(20260819)
+        creation = write_fixture(self.work_dir, fixture)
+        self.assertEqual(len(creation), 48)
+        self.assertTrue((self.work_dir / "start").exists())
+        self.assertEqual(len(list((self.work_dir / "n").iterdir())), 48)
+        valid, reason = validate_answer("\n".join(fixture.backbone) + "\n", fixture)
+        self.assertTrue(valid, reason)
+        invalid, _ = validate_answer("\n".join(reversed(fixture.backbone)) + "\n", fixture)
+        self.assertFalse(invalid)
 
 
 if __name__ == "__main__":

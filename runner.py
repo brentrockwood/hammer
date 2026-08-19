@@ -64,7 +64,8 @@ def git_commit():
 
 APPARATUS_PATHS = (
     ".dockerignore", "Dockerfile", "compose.yaml", "Makefile", "agent.c", "runner.py",
-    "harness.py", "persistence.py", "retrieval.py", "corpus.py", "tests",
+    "harness.py", "persistence.py", "retrieval.py", "c48.py", "corpus.py",
+    "graph_task.py", "tests",
     "fixtures", "infrastructure",
 )
 
@@ -380,6 +381,8 @@ class AgentContainer:
 
 def run_generation(
     log, client, generation, system_prompt, work_dir=None, max_steps=None,
+    compaction_steps=(), require_compactions_before_answer=False,
+    on_compaction=None,
 ):
     step_limit = max_steps or client.settings.max_steps
     container = AgentContainer(log.run_id, generation, work_dir).start()
@@ -389,8 +392,33 @@ def run_generation(
         container=container.identity, max_steps=step_limit,
     )
     history = [{"role": "system", "content": system_prompt}]
+    compaction_steps = tuple(compaction_steps)
+    completed_compactions = []
     answer = None
     usages = []
+
+    def compact_if_needed(step):
+        if step not in compaction_steps:
+            return
+        completed_compactions.append(step)
+        log.event(
+            "context_compaction", generation=generation, step=step,
+            retained_state="/work", discarded_state="model_transcript",
+            checkpoint_index=len(completed_compactions),
+        )
+        if on_compaction is not None:
+            on_compaction(step, container.identity)
+        history[:] = [
+            {"role": "system", "content": system_prompt},
+            {
+                "role": "user",
+                "content": (
+                    "Checkpoint reached: the prior conversation transcript "
+                    "is no longer available. /work persists. Continue the task."
+                ),
+            },
+        ]
+
     try:
         for step in range(1, step_limit + 1):
             message, usage = client.ask(history)
@@ -432,8 +460,36 @@ def run_generation(
                         ),
                     },
                 ]
+                compact_if_needed(step)
                 continue
             if action.get("action") == "answer":
+                if require_compactions_before_answer and (
+                    len(completed_compactions) != len(compaction_steps)
+                ):
+                    rejection = {
+                        "ok": False,
+                        "phase": "task_timing",
+                        "syscall": None,
+                        "error_type": "ValueError",
+                        "error": "answer is not allowed before all declared context checkpoints",
+                    }
+                    log.event(
+                        "model_action_rejected", generation=generation, step=step,
+                        rejection=rejection,
+                    )
+                    history += [
+                        {"role": "assistant", "content": model_text},
+                        {
+                            "role": "user",
+                            "content": (
+                                "action rejected; no syscall ran: "
+                                + json.dumps(rejection, separators=(",", ":"))
+                                + ". Continue the declared task."
+                            ),
+                        },
+                    ]
+                    compact_if_needed(step)
+                    continue
                 answer = action.get("answer")
                 log.event(
                     "generation_answer", generation=generation,
@@ -460,6 +516,7 @@ def run_generation(
                     "context_pressure", generation=generation, step=step,
                     threshold=0.9, usage=usage,
                 )
+            compact_if_needed(step)
         if answer is None:
             log.event(
                 "generation_exhausted", generation=generation,

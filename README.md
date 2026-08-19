@@ -88,6 +88,7 @@ Pilot runs use a dedicated AMD Strix Halo system with 128 GB unified memory. The
 - [Research overview](docs/research-overview.md)
 - [Pilot readiness criteria](docs/pilot-readiness.md)
 - [Pilot 1 forensic-observation protocol](docs/forensic-observation-protocol.md)
+- [C48 declared-compaction treatment protocol](docs/pilot-1-c48-compaction-protocol.md)
 - [Pilot 1 task-selection draft](docs/pilot-1-task-selection.md)
 - [Pilot 1 live-reconciliation semantic task draft](docs/pilot-1-live-reconciliation-spec.md)
 - [Live-reconciliation adversarial review and rejection](docs/pilot-1-live-reconciliation-adversarial-review.md)
