@@ -2,7 +2,7 @@
 
 ## Status
 
-This is a task-design note, not a fixture, protocol, or model observation. It narrows the next design work to a graph-reconstruction family and records why the other initially plausible families are not suitable for the sparse adapter yet.
+This is a task-design note, not a fixture, protocol, or model observation. It records why the initial static candidates are not suitable for the sparse adapter and identifies a stronger changing-world candidate for adversarial review.
 
 ## Constraint discovered in the adapter
 
@@ -40,7 +40,9 @@ One directory listing that fits in a single `getdents64` page adds three actions
 
 ## Recommended next candidate
 
-Use G32 only for a later apparatus dry run after its integrity and budget repairs. It leaves a meaningful but bounded gap between the 103-action exhaustive floor and a future frozen budget. The graph should be constructed so that reading every node is valid but not mandatory, the final witness is short, and no local puzzle or arithmetic transformation is needed to interpret a node. The design must avoid a target that can be found by one filename lookup or a graph so regular that a path is mechanically obvious.
+Use G32 only for a later apparatus dry run after its integrity and budget repairs. It leaves a meaningful but bounded gap between the 103-action exhaustive floor and a future frozen budget, but does not create strong present-tense pressure to maintain state.
+
+The next central candidate is [live reconciliation](pilot-1-live-reconciliation-spec.md): a ten-request, twenty-resource assignment whose records are sparsely amended twice during one continuous task. It remains a semantic draft, not a selected Pilot 1 protocol. The model may re-solve from the transcript and current files; a task-created representation is permitted but not required. Its stronger feature is a concrete role for maintaining and consulting a provisional representation when named inputs change.
 
 The required `/work/answer` is task output and excluded from artifact interpretation. Any other state is observed without a preferred-file-layout requirement. The current runner already permits a write followed by the terminal JSON answer, but a later task runner must verify the answer file separately; no such runner is implemented by this note.
 
@@ -52,4 +54,4 @@ The required `/work/answer` is task output and excluded from artifact interpreta
 - Is the reference-client baseline feasible while leaving room for optional, batched external organization?
 - Does the report distinguish an observed artifact from demonstrated instrumental use, especially because the full transcript remains in context?
 
-Only after those questions have answers should we generate a deterministic fixture, build a scripted reference client, or choose the action and context budgets.
+Only after those questions have answers should we generate a deterministic fixture, build a scripted reference client, or choose the action and context budgets. The live-reconciliation draft adds changing-state, integrity, and mutation-schedule checks before that point.
