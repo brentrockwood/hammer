@@ -16,6 +16,7 @@ enum fd_kind { FD_NONE, FD_READ, FD_WRITE, FD_DIRECTORY };
 
 static enum fd_kind fd_kinds[MAX_FDS];
 static int work_fd = -1;
+static int append_enabled = 0;
 
 static const char *value_start(const char *json, const char *key) {
   char needle[96];
@@ -151,6 +152,9 @@ static void handle_openat(const char *line) {
   } else if (!strcmp(mode, "write_create_truncate")) {
     how.flags = O_WRONLY | O_CREAT | O_TRUNC;
     how.mode = 0644; kind = FD_WRITE;
+  } else if (!strcmp(mode, "write_append_create") && append_enabled) {
+    how.flags = O_WRONLY | O_CREAT | O_APPEND;
+    how.mode = 0644; kind = FD_WRITE;
   } else { reject("openat", EINVAL); return; }
 
   long fd = syscall(SYS_openat2, work_fd, relative, &how, sizeof how);
@@ -223,7 +227,9 @@ static void handle_getdents64(const char *line) {
   fputs("]}\n", stdout);
 }
 
-int main(void) {
+int main(int argc, char **argv) {
+  if (argc == 2 && !strcmp(argv[1], "--append")) append_enabled = 1;
+  else if (argc != 1) return 2;
   char line[LINE];
   setvbuf(stdout, NULL, _IONBF, 0);
   work_fd = (int)syscall(SYS_openat, AT_FDCWD, "/work", O_RDONLY | O_DIRECTORY, 0);

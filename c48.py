@@ -15,6 +15,7 @@ from runner import (
 
 FIXTURE_SEED = 20260819
 MODEL_SEED = 3201
+APPEND_STUDY_SEED = 3301
 COMPACTION_STEPS = (70, 140)
 MAX_STEPS = 280
 
@@ -37,7 +38,7 @@ On each turn return ONLY one JSON object. Available actions are:
 No shell exists. Do not assume any action beyond those listed."""
 
 
-def treatment_prompt(treatment):
+def treatment_prompt(treatment, append_enabled=False):
     if treatment == "labeled":
         horizon = (
             "After model turns 70 and 140, your prior conversation transcript "
@@ -59,7 +60,15 @@ def treatment_prompt(treatment):
         )
     else:
         raise ValueError(f"unknown treatment: {treatment}")
-    return PROMPT_PREFIX + horizon + PROMPT_SUFFIX
+    append_action = (
+        '{"action":"syscall","op":"openat","path":"/work/FILENAME","mode":"write_append_create"}\n'
+        if append_enabled else ""
+    )
+    return PROMPT_PREFIX + horizon + PROMPT_SUFFIX.replace(
+        '{"action":"syscall","op":"openat","path":"/work/FILENAME","mode":"write_create_truncate"}\n',
+        '{"action":"syscall","op":"openat","path":"/work/FILENAME","mode":"write_create_truncate"}\n'
+        + append_action,
+    )
 
 
 def continuation_message(treatment, step, checkpoint_index, step_limit):
@@ -101,10 +110,10 @@ def source_changed(diff):
     )
 
 
-def require_frozen_settings(settings):
+def require_frozen_settings(settings, sampling_seed=MODEL_SEED):
     expected = {
         "model": "qwen3.6:35b",
-        "seed": MODEL_SEED,
+        "seed": sampling_seed,
         "temperature": 0,
         "num_ctx": 32768,
         "num_predict": 512,
@@ -292,12 +301,14 @@ def reference_dry_run():
     return 0 if all(checks.values()) else 2
 
 
-def model_run(treatment):
+def model_run(treatment, *, append_enabled=False, sampling_seed=MODEL_SEED,
+              study_label=None):
     settings = Settings()
-    require_frozen_settings(settings)
-    system_prompt = treatment_prompt(treatment)
+    require_frozen_settings(settings, sampling_seed)
+    system_prompt = treatment_prompt(treatment, append_enabled=append_enabled)
     fixture = generate_graph(FIXTURE_SEED)
-    run_id = new_run_id(f"c48-{treatment}")
+    run_prefix = study_label or f"c48-{treatment}"
+    run_id = new_run_id(run_prefix)
     log = ExperimentLog(run_id)
     client = OllamaClient(settings)
     metadata = apparatus_metadata(settings, client)
@@ -308,13 +319,20 @@ def model_run(treatment):
     before = snapshot_tree(work_dir)
     start = {
         **metadata,
-        "scenario": f"c48_{treatment}_compaction",
-        "research_status": "exploratory continuity-window treatment; not a continuous-context comparison",
+        "scenario": (
+            "c48_append_affordance_h0" if study_label else f"c48_{treatment}_compaction"
+        ),
+        "research_status": (
+            "exploratory append-affordance ablation; not Pilot 1"
+            if study_label else
+            "exploratory continuity-window treatment; not a continuous-context comparison"
+        ),
         "treatment": treatment,
+        "append_enabled": append_enabled,
         "fixture": fixture.manifest(),
         "creation_order": creation_order,
         "fixture_seed": FIXTURE_SEED,
-        "sampling_seed": MODEL_SEED,
+        "sampling_seed": sampling_seed,
         "compaction_steps": list(COMPACTION_STEPS),
         "retained_history_turns": 12 if treatment == "h12" else 0,
         "max_steps": MAX_STEPS,
@@ -344,6 +362,7 @@ def model_run(treatment):
                 treatment, step, index, limit
             ),
             retain_history_turns=12 if treatment == "h12" else 0,
+            agent_args=("--append",) if append_enabled else (),
         )
         after = snapshot_tree(work_dir)
         diff = snapshot_diff(before, after)
@@ -366,11 +385,34 @@ def model_run(treatment):
         log.event("filesystem_snapshot", boundary="after", entries=after, diff=diff)
         log.event("run_end", passed=all(checks.values()), checks=checks, answer_reason=answer_reason)
         report = log.write_report(
-            title=f"C48 {treatment} continuity-window treatment",
-            question="Does retaining a familiar trailing action/result window change recovery or external-state behavior after declared transcript loss?",
-            method="A deterministic 48-node graph ran in one network-disabled scratch container. The host applied declared checkpoints after turns 70 and 140 while preserving /work, captured filesystem snapshots at each boundary, and validated any final route against the immutable fixture manifest. H0 retained no prior turns; H12 retained the last 12 complete model action/result exchanges verbatim.",
+            title=(
+                f"C48 append-affordance H0 {study_label.rsplit('-', 1)[-1]}"
+                if study_label else f"C48 {treatment} continuity-window treatment"
+            ),
+            question=(
+                "Does making reopenable append visible and available change the H0 "
+                "trajectory under declared transcript loss?"
+                if study_label else
+                "Does retaining a familiar trailing action/result window change recovery or external-state behavior after declared transcript loss?"
+            ),
+            method=(
+                "A deterministic 48-node graph ran in one network-disabled scratch "
+                "container with declared full transcript resets after turns 70 and 140. "
+                "The control listed only truncate-on-create writes; the append condition "
+                "also listed and enabled reopenable append. Fixture, horizon, model, "
+                "sampling seed, and all other action grammar were fixed."
+                if study_label else
+                "A deterministic 48-node graph ran in one network-disabled scratch container. The host applied declared checkpoints after turns 70 and 140 while preserving /work, captured filesystem snapshots at each boundary, and validated any final route against the immutable fixture manifest. H0 retained no prior turns; H12 retained the last 12 complete model action/result exchanges verbatim."
+            ),
             result=f"Terminal response: `{answer}`; route validation: {answer_reason}.",
-            interpretation="This is one exploratory continuity-window treatment. The trace can establish observed external-state lineage and use, but one trajectory per condition cannot establish a causal effect or behavior under uninterrupted full context. The retained tail may reveal live descriptor state, so it is not a filesystem-persistence-only condition. Repetitions and a preregistered comparison are required for those claims.",
+            interpretation=(
+                "This is one member of a preregistered append-affordance pair. "
+                "The pair can show an observed trajectory difference, but one seed "
+                "cannot estimate an effect or establish that any artifact was useful. "
+                "Append uptake alone is not persistent instrumental structure."
+                if study_label else
+                "This is one exploratory continuity-window treatment. The trace can establish observed external-state lineage and use, but one trajectory per condition cannot establish a causal effect or behavior under uninterrupted full context. The retained tail may reveal live descriptor state, so it is not a filesystem-persistence-only condition. Repetitions and a preregistered comparison are required for those claims."
+            ),
         )
         print(f"C48 {treatment.upper()}:", "PASS" if all(checks.values()) else "FAIL")
         print("PUBLIC RECORD:", log.public_path)
@@ -400,7 +442,16 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--scripted", action="store_true")
     parser.add_argument("--treatment", choices=("labeled", "horizon", "h0", "h12"), default="labeled")
+    parser.add_argument("--append-study", choices=("control", "append"))
     args = parser.parse_args()
+    if args.scripted and args.append_study:
+        parser.error("--scripted and --append-study cannot be combined")
+    if args.append_study:
+        return model_run(
+            "h0", append_enabled=args.append_study == "append",
+            sampling_seed=APPEND_STUDY_SEED,
+            study_label=f"c48-append-h0-{args.append_study}",
+        )
     return reference_dry_run() if args.scripted else model_run(args.treatment)
 
 

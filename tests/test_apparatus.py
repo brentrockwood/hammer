@@ -213,8 +213,36 @@ class ApparatusTest(unittest.TestCase):
             self.assertEqual(read["data"], roundtrip)
             json.dumps(read)
             self.call(container, op="close", fd=opened["fd"])
+
+            rejected_append = self.call(
+                container, op="openat", path="/work/roundtrip",
+                mode="write_append_create",
+            )
+            self.assertFalse(rejected_append["ok"], rejected_append)
+            self.assertIsNone(rejected_append["syscall"])
         finally:
             container.stop()
+
+        append_container = AgentContainer(
+            "append-" + uuid.uuid4().hex[:10], 1, self.work_dir,
+            agent_args=("--append",),
+        ).start()
+        try:
+            self.assert_isolated(append_container)
+            opened = self.call(
+                append_container, op="openat", path="/work/roundtrip",
+                mode="write_append_create",
+            )
+            appended = "second line\n"
+            wrote = self.call(append_container, op="write", fd=opened["fd"], data=appended)
+            self.assertEqual(wrote["n"], len(appended))
+            self.call(append_container, op="close", fd=opened["fd"])
+            opened = self.call(append_container, op="openat", path="/work/roundtrip", mode="read")
+            read = self.call(append_container, op="read", fd=opened["fd"], count=4096)
+            self.assertEqual(read["data"], roundtrip + appended)
+            self.call(append_container, op="close", fd=opened["fd"])
+        finally:
+            append_container.stop()
 
     def test_eof_observation_is_scored_separately_from_answer(self):
         path = self.case_dir / "trajectory.jsonl"
@@ -305,6 +333,10 @@ class ApparatusTest(unittest.TestCase):
 
     def test_h12_prompt_declares_the_retained_tail(self):
         self.assertIn("last 12 complete action/result exchanges", treatment_prompt("h12"))
+
+    def test_append_prompt_lists_only_the_enabled_affordance(self):
+        self.assertNotIn("write_append_create", treatment_prompt("h0"))
+        self.assertIn("write_append_create", treatment_prompt("h0", append_enabled=True))
 
     def test_c48_fixture_and_route_validator(self):
         fixture = generate_graph(20260819)

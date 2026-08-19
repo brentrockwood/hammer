@@ -64,7 +64,7 @@ def git_commit():
 
 APPARATUS_PATHS = (
     ".dockerignore", "Dockerfile", "compose.yaml", "Makefile", "agent.c", "runner.py",
-    "harness.py", "persistence.py", "retrieval.py", "c48.py", "corpus.py",
+    "harness.py", "persistence.py", "retrieval.py", "c48.py", "append_calibration.py", "corpus.py",
     "graph_task.py", "tests",
     "fixtures", "infrastructure",
 )
@@ -319,12 +319,13 @@ def parse_action(text):
 
 
 class AgentContainer:
-    def __init__(self, run_id, generation, work_dir=None):
+    def __init__(self, run_id, generation, work_dir=None, agent_args=()):
         self.name = f"hammer-{run_id.lower()}-g{generation}"
         command = ["docker", "compose", "run", "--rm", "-T", "--name", self.name]
         if work_dir is not None:
             command += ["--volume", f"{work_dir}:/work"]
-        command.append("agent")
+        command += ["agent", *agent_args]
+        self.agent_args = tuple(agent_args)
         self.command = command
         self.proc = None
         self.identity = None
@@ -353,6 +354,7 @@ class AgentContainer:
                         }
                         for mount in info.get("Mounts", [])
                     ],
+                    "agent_args": list(self.agent_args),
                 }
                 return self
             if self.proc.poll() is not None:
@@ -383,9 +385,12 @@ def run_generation(
     log, client, generation, system_prompt, work_dir=None, max_steps=None,
     compaction_steps=(), require_compactions_before_answer=False,
     on_compaction=None, compaction_message=None, retain_history_turns=0,
+    agent_args=(),
 ):
     step_limit = max_steps or client.settings.max_steps
-    container = AgentContainer(log.run_id, generation, work_dir).start()
+    container = AgentContainer(
+        log.run_id, generation, work_dir, agent_args=agent_args
+    ).start()
     log.event(
         "generation_start", generation=generation,
         model_context="fresh", system_prompt=system_prompt,
