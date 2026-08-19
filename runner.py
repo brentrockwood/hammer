@@ -26,7 +26,7 @@ def env_bool(name, default=False):
 
 @dataclass(frozen=True)
 class Settings:
-    model: str = os.environ.get("OLLAMA_MODEL", "qwen2.5:7b-instruct")
+    model: str = os.environ.get("OLLAMA_MODEL", "qwen3.6:35b")
     ollama: str = os.environ.get("OLLAMA_HOST", "http://localhost:11434").rstrip("/")
     max_steps: int = int(os.environ.get("HAMMER_MAX_STEPS", "10"))
     temperature: float = float(os.environ.get("HAMMER_TEMPERATURE", "0"))

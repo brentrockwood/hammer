@@ -14,7 +14,7 @@ The model loop is deliberately host-side. Docker Compose runs the experimental s
 
 ## Run
 
-Prerequisites: Docker Compose, Python 3, and an Ollama endpoint. The default model is `qwen2.5:7b-instruct`; it completed the initial task promptly in the validation run. `OLLAMA_HOST` defaults to `http://localhost:11434` and can be set to another endpoint.
+Prerequisites: Docker Compose, Python 3, and an Ollama endpoint. The default model is `qwen3.6:35b`, the model used for the final clean retrieval calibration. `OLLAMA_HOST` defaults to `http://localhost:11434` and can be set to another endpoint.
 
 ```sh
 cd hammer
