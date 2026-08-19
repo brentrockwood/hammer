@@ -63,7 +63,7 @@ def continuation_message(treatment, step, checkpoint_index, step_limit):
     )
     if treatment == "horizon":
         return (
-            base[:-1]
+            base
             + f" This run permits at most {step_limit} model turns; at most "
             + f"{step_limit - step} turns remain."
         )

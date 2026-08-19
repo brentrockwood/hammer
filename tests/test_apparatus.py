@@ -5,6 +5,7 @@ import uuid
 from unittest.mock import patch
 
 from corpus import TARGET, add_records, expected_filenames, generate_corpus
+from c48 import continuation_message
 from graph_task import generate_graph, validate_answer, write_fixture
 from runner import AgentContainer, ROOT, run_generation
 from retrieval import generation_observations
@@ -272,6 +273,14 @@ class ApparatusTest(unittest.TestCase):
                 {"role": "system", "content": "test prompt"},
                 {"role": "user", "content": message},
             ],
+        )
+
+    def test_horizon_continuation_has_complete_sentences(self):
+        self.assertEqual(
+            continuation_message("horizon", 70, 1, 280),
+            "Checkpoint 1 of 2 reached after model turn 70. The prior conversation "
+            "transcript is no longer available. /work persists. Continue the same "
+            "task. This run permits at most 280 model turns; at most 210 turns remain.",
         )
 
     def test_c48_fixture_and_route_validator(self):
