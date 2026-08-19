@@ -9,8 +9,8 @@ from corpus import snapshot_diff, snapshot_tree
 from graph_task import generate_graph, validate_answer, write_fixture
 from runner import (
     AgentContainer, ExperimentLog, OllamaClient, ROOT, Settings,
-    apparatus_metadata, new_run_id, public_error, require_frozen_apparatus,
-    run_generation,
+    apparatus_metadata, apparatus_worktree_status, git_commit, image_metadata,
+    new_run_id, public_error, require_frozen_apparatus, run_generation,
 )
 
 FIXTURE_SEED = 20260819
@@ -67,16 +67,36 @@ def require_frozen_settings(settings):
         raise SystemExit(f"HAMMER_MAX_STEPS must be {MAX_STEPS}")
 
 
+def scripted_apparatus_metadata():
+    commit = git_commit()
+    dirty_paths = apparatus_worktree_status()
+    image = image_metadata()
+    metadata = {
+        "apparatus_commit": commit,
+        "worktree_dirty": bool(dirty_paths),
+        "dirty_apparatus_paths": dirty_paths,
+        **image,
+    }
+    if dirty_paths or image["image_revision"] != commit:
+        raise RuntimeError(
+            "scripted dry runs require a clean apparatus worktree and an image "
+            "built from that exact commit; commit, then run `make build`"
+        )
+    return metadata
+
+
 def reference_dry_run():
     run_id = new_run_id("c48-compaction-scripted")
     log = ExperimentLog(run_id)
     fixture = generate_graph(FIXTURE_SEED)
+    metadata = scripted_apparatus_metadata()
     work_dir = ROOT / ".work" / run_id / "work"
     work_dir.mkdir(parents=True)
     creation_order = write_fixture(work_dir, fixture)
     before = snapshot_tree(work_dir)
     log.event(
         "run_start",
+        **metadata,
         scenario="c48_compaction_scripted_dry_run",
         research_status="scripted apparatus dry run; no model observation",
         fixture=fixture.manifest(),
