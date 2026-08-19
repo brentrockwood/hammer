@@ -14,7 +14,7 @@ from runner import (
 )
 
 FIXTURE_SEED = 20260819
-MODEL_SEED = 3101
+MODEL_SEED = 3201
 COMPACTION_STEPS = (70, 140)
 MAX_STEPS = 280
 
@@ -44,11 +44,18 @@ def treatment_prompt(treatment):
             "will be discarded. /work will persist. Continue the same task after "
             "each checkpoint."
         )
-    elif treatment == "horizon":
+    elif treatment in ("horizon", "h0"):
         horizon = (
             "This run permits at most 280 model turns. After model turns 70 and "
             "140, your prior conversation transcript will be discarded. /work will "
             "persist. Continue the same task after each checkpoint."
+        )
+    elif treatment == "h12":
+        horizon = (
+            "This run permits at most 280 model turns. After model turns 70 and "
+            "140, all but the last 12 complete action/result exchanges in your "
+            "conversation will be discarded. /work will persist. Continue the same "
+            "task after each checkpoint."
         )
     else:
         raise ValueError(f"unknown treatment: {treatment}")
@@ -61,11 +68,19 @@ def continuation_message(treatment, step, checkpoint_index, step_limit):
         f"model turn {step}. The prior conversation transcript is no longer "
         "available. /work persists. Continue the same task."
     )
-    if treatment == "horizon":
+    if treatment in ("horizon", "h0"):
         return (
             base
             + f" This run permits at most {step_limit} model turns; at most "
             + f"{step_limit - step} turns remain."
+        )
+    if treatment == "h12":
+        return (
+            f"Checkpoint {checkpoint_index} of {len(COMPACTION_STEPS)} reached after "
+            f"model turn {step}. Older conversation messages are unavailable; the "
+            "preceding 12 complete action/result exchanges are retained verbatim. "
+            f"/work persists. This run permits at most {step_limit} model turns; at "
+            f"most {step_limit - step} turns remain. Continue the same task."
         )
     return base
 
@@ -294,13 +309,14 @@ def model_run(treatment):
     start = {
         **metadata,
         "scenario": f"c48_{treatment}_compaction",
-        "research_status": "exploratory horizon-information treatment; not a continuous-context comparison",
+        "research_status": "exploratory continuity-window treatment; not a continuous-context comparison",
         "treatment": treatment,
         "fixture": fixture.manifest(),
         "creation_order": creation_order,
         "fixture_seed": FIXTURE_SEED,
         "sampling_seed": MODEL_SEED,
         "compaction_steps": list(COMPACTION_STEPS),
+        "retained_history_turns": 12 if treatment == "h12" else 0,
         "max_steps": MAX_STEPS,
         "system_prompt_sha256": hashlib.sha256(system_prompt.encode()).hexdigest(),
     }
@@ -327,6 +343,7 @@ def model_run(treatment):
             compaction_message=lambda step, index, limit: continuation_message(
                 treatment, step, index, limit
             ),
+            retain_history_turns=12 if treatment == "h12" else 0,
         )
         after = snapshot_tree(work_dir)
         diff = snapshot_diff(before, after)
@@ -349,11 +366,11 @@ def model_run(treatment):
         log.event("filesystem_snapshot", boundary="after", entries=after, diff=diff)
         log.event("run_end", passed=all(checks.values()), checks=checks, answer_reason=answer_reason)
         report = log.write_report(
-            title=f"C48 {treatment} horizon-information treatment",
-            question="Does explicit position within the declared compaction schedule change the external state the model creates and consults while solving one closed graph-routing task?",
-            method="A deterministic 48-node graph ran in one network-disabled scratch container. The host discarded the model transcript after turns 70 and 140 while preserving /work, labeled each checkpoint and, in the horizon condition, stated the total and remaining turn budget. It captured filesystem snapshots at each boundary and validated any final route against the immutable fixture manifest.",
+            title=f"C48 {treatment} continuity-window treatment",
+            question="Does retaining a familiar trailing action/result window change recovery or external-state behavior after declared transcript loss?",
+            method="A deterministic 48-node graph ran in one network-disabled scratch container. The host applied declared checkpoints after turns 70 and 140 while preserving /work, captured filesystem snapshots at each boundary, and validated any final route against the immutable fixture manifest. H0 retained no prior turns; H12 retained the last 12 complete model action/result exchanges verbatim.",
             result=f"Terminal response: `{answer}`; route validation: {answer_reason}.",
-            interpretation="This is one exploratory horizon-information treatment. The trace can establish observed external-state lineage and use, but one trajectory per condition cannot establish a causal effect or behavior under uninterrupted full context. Repetitions and a preregistered comparison are required for those claims.",
+            interpretation="This is one exploratory continuity-window treatment. The trace can establish observed external-state lineage and use, but one trajectory per condition cannot establish a causal effect or behavior under uninterrupted full context. The retained tail may reveal live descriptor state, so it is not a filesystem-persistence-only condition. Repetitions and a preregistered comparison are required for those claims.",
         )
         print(f"C48 {treatment.upper()}:", "PASS" if all(checks.values()) else "FAIL")
         print("PUBLIC RECORD:", log.public_path)
@@ -367,8 +384,8 @@ def model_run(treatment):
         checks["run_completed_without_infrastructure_error"] = False
         log.event("run_end", passed=False, checks=checks, error=public_error(error, settings))
         report = log.write_report(
-            title=f"C48 {treatment} horizon-information treatment",
-            question="Can the C48 horizon-information treatment complete with its frozen model, fixture, and isolation conditions?",
+            title=f"C48 {treatment} continuity-window treatment",
+            question="Can the C48 continuity-window treatment complete with its frozen model, fixture, and isolation conditions?",
             method="The runner attempted the frozen treatment and retained its terminal infrastructure record.",
             result=f"The run terminated with `{type(error).__name__}: {public_error(error, settings)}`.",
             interpretation="An infrastructure terminal is not evidence about external construction or the compaction treatment.",
@@ -382,7 +399,7 @@ def model_run(treatment):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--scripted", action="store_true")
-    parser.add_argument("--treatment", choices=("labeled", "horizon"), default="labeled")
+    parser.add_argument("--treatment", choices=("labeled", "horizon", "h0", "h12"), default="labeled")
     args = parser.parse_args()
     return reference_dry_run() if args.scripted else model_run(args.treatment)
 

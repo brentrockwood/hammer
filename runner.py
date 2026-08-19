@@ -382,7 +382,7 @@ class AgentContainer:
 def run_generation(
     log, client, generation, system_prompt, work_dir=None, max_steps=None,
     compaction_steps=(), require_compactions_before_answer=False,
-    on_compaction=None, compaction_message=None,
+    on_compaction=None, compaction_message=None, retain_history_turns=0,
 ):
     step_limit = max_steps or client.settings.max_steps
     container = AgentContainer(log.run_id, generation, work_dir).start()
@@ -402,6 +402,9 @@ def run_generation(
             return
         completed_compactions.append(step)
         checkpoint_index = len(completed_compactions)
+        retained_message_count = 2 * retain_history_turns
+        retained_history = history[-retained_message_count:] if retained_message_count else []
+        retained_start_step = max(1, step - retain_history_turns + 1) if retained_history else None
         continuation = (
             compaction_message(step, checkpoint_index, step_limit)
             if compaction_message is not None else
@@ -412,11 +415,15 @@ def run_generation(
             "context_compaction", generation=generation, step=step,
             retained_state="/work", discarded_state="model_transcript",
             checkpoint_index=checkpoint_index, continuation_message=continuation,
+            retained_turns=retain_history_turns,
+            retained_message_count=len(retained_history),
+            retained_step_start=retained_start_step,
         )
         if on_compaction is not None:
             on_compaction(step, container.identity)
         history[:] = [
             {"role": "system", "content": system_prompt},
+            *retained_history,
             {
                 "role": "user",
                 "content": continuation,

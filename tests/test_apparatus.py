@@ -5,7 +5,7 @@ import uuid
 from unittest.mock import patch
 
 from corpus import TARGET, add_records, expected_filenames, generate_corpus
-from c48 import continuation_message
+from c48 import continuation_message, treatment_prompt
 from graph_task import generate_graph, validate_answer, write_fixture
 from runner import AgentContainer, ROOT, run_generation
 from retrieval import generation_observations
@@ -282,6 +282,29 @@ class ApparatusTest(unittest.TestCase):
             "transcript is no longer available. /work persists. Continue the same "
             "task. This run permits at most 280 model turns; at most 210 turns remain.",
         )
+
+    def test_retained_tail_is_verbatim_and_precedes_continuation(self):
+        log = MemoryLog()
+        client = CompactionFakeClient()
+        message = "Older messages are unavailable; retained tail follows."
+        with patch("runner.AgentContainer", return_value=FakeContainer()):
+            answer, _ = run_generation(
+                log, client, 1, "test prompt", max_steps=2,
+                compaction_steps=(1,), retain_history_turns=1,
+                compaction_message=lambda step, index, limit: message,
+            )
+        self.assertEqual(answer, "done")
+        self.assertEqual(client.histories[1][0], {"role": "system", "content": "test prompt"})
+        self.assertEqual(client.histories[1][1]["content"], '{"action":"syscall","op":"close","fd":9}')
+        self.assertTrue(client.histories[1][2]["content"].startswith("syscall result: "))
+        self.assertEqual(client.histories[1][3], {"role": "user", "content": message})
+        compaction = next(event for event in log.events if event["event"] == "context_compaction")
+        self.assertEqual(compaction["retained_turns"], 1)
+        self.assertEqual(compaction["retained_message_count"], 2)
+        self.assertEqual(compaction["retained_step_start"], 1)
+
+    def test_h12_prompt_declares_the_retained_tail(self):
+        self.assertIn("last 12 complete action/result exchanges", treatment_prompt("h12"))
 
     def test_c48_fixture_and_route_validator(self):
         fixture = generate_graph(20260819)
