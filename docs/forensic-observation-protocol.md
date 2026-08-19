@@ -47,6 +47,7 @@ Likewise, an exact final result does not prove that any artifact was useful, and
 
 ## Before the first included run
 
+- Select and adversarially review a task family; the current candidate is recorded in [pilot-1-task-selection.md](pilot-1-task-selection.md).
 - Freeze the task, fixture generator, deterministic halt check, model identity, seeds, budgets, repair policy, and publication fields.
 - Establish that the task is feasible through the exposed primitives without making a particular artifact necessary.
 - Review the task prompt, fixture, and halt check together for hidden strategy requirements or contradictions.
