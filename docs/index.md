@@ -16,7 +16,7 @@ Future experiment families should use the same compact form: an uppercase family
 | G32 | Proposed, then demoted | The static graph proposal and adversarial review identified an incentive problem: external state had no demonstrated current-goal advantage. |
 | Live reconciliation | Rejected before a run | A known future amendment would make deferral a rational strategy; it is not a clean persistence treatment. |
 | C48 compaction | One exploratory observation recorded | Declared transcript loss did not produce a filesystem artifact in the observed trajectory; the run exhausted its action budget without an answer. It is not a general causal result. |
-| C48-L / C48-H | Protocol frozen; runs pending | Follow-ups that identify the checkpoint, then additionally disclose the turn horizon, to diagnose whether missing temporal orientation explains the initial negative result. |
+| C48-L / C48-H | One exploratory observation each | Exact checkpoint labels, and then labels plus a declared 280-turn horizon, still produced no model-created filesystem state or answer. C48-H did close descriptors; that is not persistent construction. |
 
 ## Read in this order
 
@@ -25,7 +25,7 @@ Future experiment families should use the same compact form: an uppercase family
 3. [Pilot direction correction](pilot-1-direction-20260818.md) and [task selection](pilot-1-task-selection.md) — why repeated independent tasks were not retained as Pilot 1.
 4. [C48 frozen protocol](pilot-1-c48-compaction-protocol.md) — the declared-compaction treatment and its interpretation limits.
 5. [C48 run report](../runs/c48-compaction-20260819T113718Z.md) and its [machine trajectory](../runs/c48-compaction-20260819T113718Z.jsonl) — the completed negative result.
-6. [C48 horizon-information protocol](c48-horizon-information-protocol.md) — the frozen diagnostic follow-up.
+6. [C48 horizon-information protocol](c48-horizon-information-protocol.md), [C48-L report](../runs/c48-labeled-20260819T154515Z.md), and [C48-H report](../runs/c48-horizon-20260819T155857Z.md) — the frozen follow-up and its two observations.
 7. [VM execution design](vm-execution-design.md) — the separate future condition for native self-authored execution.
 
 ## Reading a run
