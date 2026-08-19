@@ -24,23 +24,23 @@ Transactions distributed across large files might invite account-specific indexe
 
 Small opaque node records form a directed graph with cycles, dead ends, and a hidden target predicate. The model receives a known starting node and must write a short witness path or target identifier to `/work/answer`, then return `done`. The prompt need not mention enumeration, a visited set, a frontier, scratch files, or future work.
 
-This is the recommended family. A model may solve it by direct reasoning, selectively explore, construct a small frontier or visited record, make and abandon one, or fail. None of those behaviors is required for task validity.
+This is the recommended family. A model may solve it by direct reasoning, selectively explore, construct a small frontier or visited record, make and abandon one, or fail. None of those behaviors is required for task validity. The current semantic candidate is [G32](pilot-1-g32-spec.md).
 
 ## Candidate sizes and action accounting
 
-Assume every node fits in one read and the model learns successor paths from node contents. The lower bound below is an exhaustive one-pass inspection of all nodes, a required answer file, and the terminal `answer` action; it excludes model-action repairs, directory enumeration, repeated reads, and scratch work.
+Assume every node fits in one read, the model first reads `/work/start`, and successor paths come from node contents. The lower bound below is an exhaustive one-pass inspection, a required answer file, and the terminal `answer` action; it excludes model-action repairs, directory enumeration, repeated reads, and scratch work.
 
-| Variant | Node records | Node-read floor | Answer-file floor | Terminal action | Total floor |
-|---|---:|---:|---:|---:|---:|
-| G24 | 24 | 72 | 3 | 1 | 76 |
-| G32 | 32 | 96 | 3 | 1 | 100 |
-| G40 | 40 | 120 | 3 | 1 | 124 |
+| Variant | Node records | Node-read floor | Start-file floor | Answer-file floor | Terminal action | Total floor |
+|---|---:|---:|---:|---:|---:|---:|
+| G24 | 24 | 72 | 3 | 3 | 1 | 79 |
+| G32 | 32 | 96 | 3 | 3 | 1 | 103 |
+| G40 | 40 | 120 | 3 | 3 | 1 | 127 |
 
 One directory listing that fits in a single `getdents64` page adds three actions: open directory, read entries, close directory. One scratch-file checkpoint adds at least three actions to write; consulting it later adds three more. A model that rewrites one index after each of 32 node reads would add 96 actions, so a 150–200-action budget would leave little or no room for navigation mistakes. This is why the first fixture should make batching possible rather than silently require per-node bookkeeping.
 
 ## Recommended next candidate
 
-Begin with G32. It leaves a meaningful but bounded gap between the 100-action exhaustive floor and a future frozen budget. The graph should be constructed so that reading every node is valid but not mandatory, the final witness is short, and no local puzzle or arithmetic transformation is needed to interpret a node. The design must avoid a target that can be found by one filename lookup or a graph so regular that a path is mechanically obvious.
+Begin with G32. It leaves a meaningful but bounded gap between the 103-action exhaustive floor and a future frozen budget. The graph should be constructed so that reading every node is valid but not mandatory, the final witness is short, and no local puzzle or arithmetic transformation is needed to interpret a node. The design must avoid a target that can be found by one filename lookup or a graph so regular that a path is mechanically obvious.
 
 The required `/work/answer` is task output and excluded from artifact interpretation. Any other state is observed without a preferred-file-layout requirement. The current runner already permits a write followed by the terminal JSON answer, but a later task runner must verify the answer file separately; no such runner is implemented by this note.
 
