@@ -382,7 +382,7 @@ class AgentContainer:
 def run_generation(
     log, client, generation, system_prompt, work_dir=None, max_steps=None,
     compaction_steps=(), require_compactions_before_answer=False,
-    on_compaction=None,
+    on_compaction=None, compaction_message=None,
 ):
     step_limit = max_steps or client.settings.max_steps
     container = AgentContainer(log.run_id, generation, work_dir).start()
@@ -401,10 +401,17 @@ def run_generation(
         if step not in compaction_steps:
             return
         completed_compactions.append(step)
+        checkpoint_index = len(completed_compactions)
+        continuation = (
+            compaction_message(step, checkpoint_index, step_limit)
+            if compaction_message is not None else
+            "Checkpoint reached: the prior conversation transcript is no longer "
+            "available. /work persists. Continue the task."
+        )
         log.event(
             "context_compaction", generation=generation, step=step,
             retained_state="/work", discarded_state="model_transcript",
-            checkpoint_index=len(completed_compactions),
+            checkpoint_index=checkpoint_index, continuation_message=continuation,
         )
         if on_compaction is not None:
             on_compaction(step, container.identity)
@@ -412,10 +419,7 @@ def run_generation(
             {"role": "system", "content": system_prompt},
             {
                 "role": "user",
-                "content": (
-                    "Checkpoint reached: the prior conversation transcript "
-                    "is no longer available. /work persists. Continue the task."
-                ),
+                "content": continuation,
             },
         ]
 

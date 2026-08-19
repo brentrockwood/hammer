@@ -47,6 +47,25 @@ class FakeClient:
         return self.messages.pop(0), usage
 
 
+class CompactionFakeClient:
+    settings = FakeSettings()
+
+    def __init__(self):
+        self.histories = []
+        self.messages = [
+            {"role": "assistant", "content": '{"action":"syscall","op":"close","fd":9}'},
+            {"role": "assistant", "content": '{"action":"answer","answer":"done"}'},
+        ]
+
+    def ask(self, history):
+        self.histories.append(list(history))
+        usage = {
+            "prompt_tokens": 10, "completion_tokens": 5,
+            "context_tokens_after_response": 15, "context_utilization": 0.0,
+        }
+        return self.messages.pop(0), usage
+
+
 class FakeContainer:
     identity = {
         "container_id": "fake", "network_mode": "none",
@@ -57,7 +76,9 @@ class FakeContainer:
         return self
 
     def syscall(self, request):
-        raise AssertionError("rejected action must not reach the adapter")
+        if request == {"op": "close", "fd": 9}:
+            return {"ok": True, "op": "close", "syscall": "close"}
+        raise AssertionError("unexpected adapter request")
 
     def stop(self):
         return 0
@@ -229,6 +250,29 @@ class ApparatusTest(unittest.TestCase):
         self.assertEqual(len(rejected), 1)
         self.assertIsNone(rejected[0]["rejection"]["syscall"])
         self.assertFalse(any(event["event"] == "generation_error" for event in log.events))
+
+    def test_compaction_replaces_history_and_records_exact_continuation(self):
+        log = MemoryLog()
+        client = CompactionFakeClient()
+        message = "Checkpoint 1 of 1 reached after model turn 1. Continue."
+        with patch("runner.AgentContainer", return_value=FakeContainer()):
+            answer, _ = run_generation(
+                log, client, 1, "test prompt", max_steps=2,
+                compaction_steps=(1,),
+                compaction_message=lambda step, index, limit: message,
+            )
+        self.assertEqual(answer, "done")
+        compaction = next(
+            event for event in log.events if event["event"] == "context_compaction"
+        )
+        self.assertEqual(compaction["continuation_message"], message)
+        self.assertEqual(
+            client.histories[1],
+            [
+                {"role": "system", "content": "test prompt"},
+                {"role": "user", "content": message},
+            ],
+        )
 
     def test_c48_fixture_and_route_validator(self):
         fixture = generate_graph(20260819)

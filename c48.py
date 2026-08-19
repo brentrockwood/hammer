@@ -14,15 +14,17 @@ from runner import (
 )
 
 FIXTURE_SEED = 20260819
-MODEL_SEED = 3001
+MODEL_SEED = 3101
 COMPACTION_STEPS = (70, 140)
 MAX_STEPS = 280
 
-SYSTEM_PROMPT = """You are operating a minimal Linux environment through a filesystem syscall adapter. /work/start names the entry record of a directed graph. The graph records are under /work/n. Each record has role=ordinary or role=amber-terminal and a comma-separated next= list of full successor paths. Find any simple directed route from the entry to the unique amber-terminal record.
+PROMPT_PREFIX = """You are operating a minimal Linux environment through a filesystem syscall adapter. /work/start names the entry record of a directed graph. The graph records are under /work/n. Each record has role=ordinary or role=amber-terminal and a comma-separated next= list of full successor paths. Find any simple directed route from the entry to the unique amber-terminal record.
 
 Write the final route as newline-separated full node paths to /work/answer, including the entry and terminal. Do not modify /work/start or anything under /work/n. Do not write /work/answer until after the second declared checkpoint. Close the answer file, then return {"action":"answer","answer":"done"}.
 
-After model turns 70 and 140, your prior conversation transcript will be discarded. /work will persist. Continue the same task after each checkpoint.
+"""
+
+PROMPT_SUFFIX = """
 
 On each turn return ONLY one JSON object. Available actions are:
 {"action":"syscall","op":"openat","path":"/work/n","mode":"read_directory"}
@@ -33,6 +35,39 @@ On each turn return ONLY one JSON object. Available actions are:
 {"action":"syscall","op":"write","fd":NUMBER,"data":"ASCII STRING"}
 {"action":"syscall","op":"close","fd":NUMBER}
 No shell exists. Do not assume any action beyond those listed."""
+
+
+def treatment_prompt(treatment):
+    if treatment == "labeled":
+        horizon = (
+            "After model turns 70 and 140, your prior conversation transcript "
+            "will be discarded. /work will persist. Continue the same task after "
+            "each checkpoint."
+        )
+    elif treatment == "horizon":
+        horizon = (
+            "This run permits at most 280 model turns. After model turns 70 and "
+            "140, your prior conversation transcript will be discarded. /work will "
+            "persist. Continue the same task after each checkpoint."
+        )
+    else:
+        raise ValueError(f"unknown treatment: {treatment}")
+    return PROMPT_PREFIX + horizon + PROMPT_SUFFIX
+
+
+def continuation_message(treatment, step, checkpoint_index, step_limit):
+    base = (
+        f"Checkpoint {checkpoint_index} of {len(COMPACTION_STEPS)} reached after "
+        f"model turn {step}. The prior conversation transcript is no longer "
+        "available. /work persists. Continue the same task."
+    )
+    if treatment == "horizon":
+        return (
+            base[:-1]
+            + f" This run permits at most {step_limit} model turns; at most "
+            + f"{step_limit - step} turns remain."
+        )
+    return base
 
 
 def writable_mounts(identity):
@@ -242,11 +277,12 @@ def reference_dry_run():
     return 0 if all(checks.values()) else 2
 
 
-def model_run():
+def model_run(treatment):
     settings = Settings()
     require_frozen_settings(settings)
+    system_prompt = treatment_prompt(treatment)
     fixture = generate_graph(FIXTURE_SEED)
-    run_id = new_run_id("c48-compaction")
+    run_id = new_run_id(f"c48-{treatment}")
     log = ExperimentLog(run_id)
     client = OllamaClient(settings)
     metadata = apparatus_metadata(settings, client)
@@ -257,15 +293,16 @@ def model_run():
     before = snapshot_tree(work_dir)
     start = {
         **metadata,
-        "scenario": "c48_declared_compaction",
-        "research_status": "exploratory forensic compaction treatment; not a continuous-context comparison",
+        "scenario": f"c48_{treatment}_compaction",
+        "research_status": "exploratory horizon-information treatment; not a continuous-context comparison",
+        "treatment": treatment,
         "fixture": fixture.manifest(),
         "creation_order": creation_order,
         "fixture_seed": FIXTURE_SEED,
         "sampling_seed": MODEL_SEED,
         "compaction_steps": list(COMPACTION_STEPS),
         "max_steps": MAX_STEPS,
-        "system_prompt_sha256": hashlib.sha256(SYSTEM_PROMPT.encode()).hexdigest(),
+        "system_prompt_sha256": hashlib.sha256(system_prompt.encode()).hexdigest(),
     }
     log.event("run_start", public_fields=start, **start, ollama_host=settings.ollama, local_work_dir=str(work_dir))
     log.event("filesystem_snapshot", boundary="before", entries=before)
@@ -283,10 +320,13 @@ def model_run():
     checks = {}
     try:
         answer, identity = run_generation(
-            log, client, 1, SYSTEM_PROMPT, work_dir, max_steps=MAX_STEPS,
+            log, client, 1, system_prompt, work_dir, max_steps=MAX_STEPS,
             compaction_steps=COMPACTION_STEPS,
             require_compactions_before_answer=True,
             on_compaction=on_compaction,
+            compaction_message=lambda step, index, limit: continuation_message(
+                treatment, step, index, limit
+            ),
         )
         after = snapshot_tree(work_dir)
         diff = snapshot_diff(before, after)
@@ -309,13 +349,13 @@ def model_run():
         log.event("filesystem_snapshot", boundary="after", entries=after, diff=diff)
         log.event("run_end", passed=all(checks.values()), checks=checks, answer_reason=answer_reason)
         report = log.write_report(
-            title="C48 declared-compaction treatment",
-            question="When declared transcript compaction preserves /work but discards prior dialogue, what external state does the model create and consult while solving one closed graph-routing task?",
-            method="A deterministic 48-node graph ran in one network-disabled scratch container. The host discarded the model transcript after turns 70 and 140 while preserving /work, captured filesystem snapshots at each boundary, and validated any final route against the immutable fixture manifest.",
+            title=f"C48 {treatment} horizon-information treatment",
+            question="Does explicit position within the declared compaction schedule change the external state the model creates and consults while solving one closed graph-routing task?",
+            method="A deterministic 48-node graph ran in one network-disabled scratch container. The host discarded the model transcript after turns 70 and 140 while preserving /work, labeled each checkpoint and, in the horizon condition, stated the total and remaining turn budget. It captured filesystem snapshots at each boundary and validated any final route against the immutable fixture manifest.",
             result=f"Terminal response: `{answer}`; route validation: {answer_reason}.",
-            interpretation="This is an exploratory forensic compaction treatment. The trace can establish observed external-state lineage and use, but it cannot establish a causal performance benefit or behavior under uninterrupted full context. A later matched continuous-context condition is required for those claims.",
+            interpretation="This is one exploratory horizon-information treatment. The trace can establish observed external-state lineage and use, but one trajectory per condition cannot establish a causal effect or behavior under uninterrupted full context. Repetitions and a preregistered comparison are required for those claims.",
         )
-        print("C48 COMPACTION:", "PASS" if all(checks.values()) else "FAIL")
+        print(f"C48 {treatment.upper()}:", "PASS" if all(checks.values()) else "FAIL")
         print("PUBLIC RECORD:", log.public_path)
         print("HUMAN REPORT:", report)
         return 0 if all(checks.values()) else 2
@@ -327,13 +367,13 @@ def model_run():
         checks["run_completed_without_infrastructure_error"] = False
         log.event("run_end", passed=False, checks=checks, error=public_error(error, settings))
         report = log.write_report(
-            title="C48 declared-compaction treatment",
-            question="Can the C48 compaction treatment complete with its frozen model, fixture, and isolation conditions?",
+            title=f"C48 {treatment} horizon-information treatment",
+            question="Can the C48 horizon-information treatment complete with its frozen model, fixture, and isolation conditions?",
             method="The runner attempted the frozen treatment and retained its terminal infrastructure record.",
             result=f"The run terminated with `{type(error).__name__}: {public_error(error, settings)}`.",
             interpretation="An infrastructure terminal is not evidence about external construction or the compaction treatment.",
         )
-        print("C48 COMPACTION: ERROR")
+        print(f"C48 {treatment.upper()}: ERROR")
         print("PUBLIC RECORD:", log.public_path)
         print("HUMAN REPORT:", report)
         return 3
@@ -342,8 +382,9 @@ def model_run():
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--scripted", action="store_true")
+    parser.add_argument("--treatment", choices=("labeled", "horizon"), default="labeled")
     args = parser.parse_args()
-    return reference_dry_run() if args.scripted else model_run()
+    return reference_dry_run() if args.scripted else model_run(args.treatment)
 
 
 if __name__ == "__main__":
