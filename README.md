@@ -85,6 +85,7 @@ Pilot runs use a dedicated AMD Strix Halo system with 128 GB unified memory. The
 
 ## Protocol notes
 
+- [Experiment index and naming convention](docs/index.md)
 - [Research overview](docs/research-overview.md)
 - [Pilot readiness criteria](docs/pilot-readiness.md)
 - [Pilot 1 forensic-observation protocol](docs/forensic-observation-protocol.md)
