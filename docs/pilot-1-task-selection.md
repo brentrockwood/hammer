@@ -2,7 +2,7 @@
 
 ## Status
 
-This is a task-design note, not a fixture, protocol, or model observation. It records why the initial static candidates are not suitable for the sparse adapter and identifies a stronger changing-world candidate for adversarial review.
+This is a task-design note, not a fixture, protocol, or model observation. It records why the initial static candidates are not suitable for the sparse adapter. No central Pilot 1 task is currently selected.
 
 ## Constraint discovered in the adapter
 
@@ -42,7 +42,7 @@ One directory listing that fits in a single `getdents64` page adds three actions
 
 Use G32 only for a later apparatus dry run after its integrity and budget repairs. It leaves a meaningful but bounded gap between the 103-action exhaustive floor and a future frozen budget, but does not create strong present-tense pressure to maintain state.
 
-The next central candidate is [live reconciliation](pilot-1-live-reconciliation-spec.md): a ten-request, twenty-resource assignment whose records are sparsely amended twice during one continuous task. It remains a semantic draft, not a selected Pilot 1 protocol. The model may re-solve from the transcript and current files; a task-created representation is permitted but not required. Its stronger feature is a concrete role for maintaining and consulting a provisional representation when named inputs change.
+The [live-reconciliation](pilot-1-live-reconciliation-spec.md) candidate was designed to create a role for maintaining a provisional representation when named inputs change. Its adversarial review rejected it: a model can rationally defer work until the final amendment, while fixed action-count delivery would create meaningless work in an adapter without a wait action. Do not implement it as Pilot 1; see the [review](pilot-1-live-reconciliation-adversarial-review.md).
 
 The required `/work/answer` is task output and excluded from artifact interpretation. Any other state is observed without a preferred-file-layout requirement. The current runner already permits a write followed by the terminal JSON answer, but a later task runner must verify the answer file separately; no such runner is implemented by this note.
 
@@ -54,4 +54,4 @@ The required `/work/answer` is task output and excluded from artifact interpreta
 - Is the reference-client baseline feasible while leaving room for optional, batched external organization?
 - Does the report distinguish an observed artifact from demonstrated instrumental use, especially because the full transcript remains in context?
 
-Only after those questions have answers should we generate a deterministic fixture, build a scripted reference client, or choose the action and context budgets. The live-reconciliation draft adds changing-state, integrity, and mutation-schedule checks before that point.
+Only after those questions have answers should we generate a deterministic fixture, build a scripted reference client, or choose the action and context budgets. The task search must first establish a pressure criterion that does not rely on an action clock, a hidden inspection gate, an explicitly required intermediate artifact, or a model-visible future task.

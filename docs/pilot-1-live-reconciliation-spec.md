@@ -2,7 +2,7 @@
 
 ## Status
 
-This is the stronger successor candidate to G32. It is a task-design record only: no generator, reference client, task runner, or model observation exists. It must be adversarially reviewed before any implementation or Pilot 1 run.
+This is a rejected successor candidate to G32. It remains a task-design record only: no generator, reference client, task runner, or model observation exists. Its adversarial review found that the event mechanism would confound the behavior of interest; see [pilot-1-live-reconciliation-adversarial-review.md](pilot-1-live-reconciliation-adversarial-review.md). Do not implement or run it as Pilot 1.
 
 ## The task
 
