@@ -17,6 +17,7 @@ Future experiment families should use the same compact form: an uppercase family
 | Live reconciliation | Rejected before a run | A known future amendment would make deferral a rational strategy; it is not a clean persistence treatment. |
 | C48 compaction | One exploratory observation recorded | Declared transcript loss did not produce a filesystem artifact in the observed trajectory; the run exhausted its action budget without an answer. It is not a general causal result. |
 | C48-L / C48-H | One exploratory observation each | Exact checkpoint labels, and then labels plus a declared 280-turn horizon, still produced no model-created filesystem state or answer. C48-H did close descriptors; that is not persistent construction. |
+| C48 H0 / H12 | One exploratory continuity-window pair | With the same fixture, seed, model settings, and budgets, H0 made no write attempt; H12 created one invalid candidate answer after checkpoint 1 and did not reuse it. One pair does not identify the cause of that difference or establish persistence. |
 
 ## Read in this order
 
@@ -26,7 +27,8 @@ Future experiment families should use the same compact form: an uppercase family
 4. [C48 frozen protocol](pilot-1-c48-compaction-protocol.md) — the declared-compaction treatment and its interpretation limits.
 5. [C48 run report](../runs/c48-compaction-20260819T113718Z.md) and its [machine trajectory](../runs/c48-compaction-20260819T113718Z.jsonl) — the completed negative result.
 6. [C48 horizon-information protocol](c48-horizon-information-protocol.md), [C48-L report](../runs/c48-labeled-20260819T154515Z.md), and [C48-H report](../runs/c48-horizon-20260819T155857Z.md) — the frozen follow-up and its two observations.
-7. [VM execution design](vm-execution-design.md) — the separate future condition for native self-authored execution.
+7. [C48 continuity-window protocol](c48-continuity-window-protocol.md), [H0 report](../runs/c48-h0-20260819T165510Z.md), and [H12 report](../runs/c48-h12-20260819T201228Z.md) — the full-reset and 12-exchange-tail exploratory pair.
+8. [VM execution design](vm-execution-design.md) — the separate future condition for native self-authored execution.
 
 ## Reading a run
 
