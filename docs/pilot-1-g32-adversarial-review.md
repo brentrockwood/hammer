@@ -2,7 +2,7 @@
 
 ## Scope
 
-This is a design review, not a Hammer run. No G32 fixture, reference client, task runner, or model-under-study trajectory exists. The review combines an adapter-grounded human audit with one fresh, blind review from local `qwen3.6:35b` using a 32,768-token request, non-thinking mode, temperature 0, and seed 2006. The Qwen response stopped at its 768-token cap (`done_reason: length`), so it is retained as partial design input rather than a complete independent review. Subsequent substantive model reviews follow the higher-cap [model-review protocol](model-review-protocol.md); this historical response is not retroactively treated as complete.
+This is a design review, not a Hammer run. No G32 fixture, reference client, task runner, or model-under-study trajectory exists. The review combines an adapter-grounded human audit with one fresh, blind review from local `qwen3.6:35b` using a 32,768-token request, non-thinking mode, temperature 0, and seed 2006. The Qwen response stopped at its 768-token cap (`done_reason: length`), so it is retained as partial design input rather than a complete independent review.
 
 ## Decision
 
