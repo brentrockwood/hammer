@@ -18,7 +18,7 @@ Future experiment families should use the same compact form: an uppercase family
 | C48 compaction | One exploratory observation recorded | Declared transcript loss did not produce a filesystem artifact in the observed trajectory; the run exhausted its action budget without an answer. It is not a general causal result. |
 | C48-L / C48-H | One exploratory observation each | Exact checkpoint labels, and then labels plus a declared 280-turn horizon, still produced no model-created filesystem state or answer. C48-H did close descriptors; that is not persistent construction. |
 | C48 H0 / H12 | One exploratory continuity-window pair | With the same fixture, seed, model settings, and budgets, H0 made no write attempt; H12 created one invalid candidate answer after checkpoint 1 and did not reuse it. One pair does not identify the cause of that difference or establish persistence. |
-| C48 append affordance | Frozen; calibration and pair pending | A new opt-in `openat` append mode will be compared with its absent control under fresh H0 conditions. It is an apparatus/affordance ablation, not Pilot 1. |
+| C48 append affordance | One exploratory pair recorded | Scripted append calibration passed. The append-visible member did not request append or create state, but its action trajectory differed from the control. One pair does not isolate why. |
 
 ## Read in this order
 
@@ -29,7 +29,7 @@ Future experiment families should use the same compact form: an uppercase family
 5. [C48 run report](../runs/c48-compaction-20260819T113718Z.md) and its [machine trajectory](../runs/c48-compaction-20260819T113718Z.jsonl) — the completed negative result.
 6. [C48 horizon-information protocol](c48-horizon-information-protocol.md), [C48-L report](../runs/c48-labeled-20260819T154515Z.md), and [C48-H report](../runs/c48-horizon-20260819T155857Z.md) — the frozen follow-up and its two observations.
 7. [C48 continuity-window protocol](c48-continuity-window-protocol.md), [H0 report](../runs/c48-h0-20260819T165510Z.md), and [H12 report](../runs/c48-h12-20260819T201228Z.md) — the full-reset and 12-exchange-tail exploratory pair.
-8. [C48 append-affordance protocol](c48-append-affordance-protocol.md) — the frozen small mechanism ablation.
+8. [C48 append-affordance protocol](c48-append-affordance-protocol.md), [scripted calibration](../runs/append-calibration-20260819T211522Z.md), [control](../runs/c48-append-h0-control-20260819T211551Z.md), and [append-visible member](../runs/c48-append-h0-append-20260819T213005Z.md) — the completed small mechanism ablation.
 9. [VM execution design](vm-execution-design.md) — the separate future condition for native self-authored execution.
 
 ## Reading a run
