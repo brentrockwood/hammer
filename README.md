@@ -75,7 +75,7 @@ It performs complete 10- and 50-record scans with valid 512-byte directory pages
 
 The retrieval work calibrated the apparatus, but it also exposed an incentive error in the proposed experiment. A model given a fresh context, one independent task, and no reason to expect a successor has no reason to build infrastructure for that successor. Repeated host-side tasks do not by themselves create a model-visible future.
 
-Pilot 1 is therefore being redesigned around one difficult, long-running goal in one continuous context. The task should make interim external state useful now without asking for notes, indexes, tools, caching, or future planning. Files created during the run will be classified after the fact as required task output, ephemeral support artifacts, or persistent instrumental structure. Correct task completion remains the primary outcome; particular strategies such as exhaustive scanning or reaching directory EOF are calibration checks, not required research behavior.
+Pilot 1 is therefore being redesigned around one difficult, long-running goal in one continuous context. The task should make interim external state useful now without asking for notes, indexes, tools, caching, or future planning. Its first product will be a forensic record of successful, failed, and abandoned external constructions. A small deterministic task-outcome check will close each observation, but will not reward a preferred strategy or decide whether an artifact is interesting. See the [forensic-observation protocol](docs/forensic-observation-protocol.md).
 
 Known-future persistence across context resets is a separate later experiment. In that condition, the existence of future work is an explicit treatment variable rather than information available only to the experimenter. The concrete Pilot 1 task, controls, budgets, repetitions, seeds, and artifact rubric still need to be frozen before a research run.
 
@@ -87,6 +87,7 @@ Pilot runs use a dedicated AMD Strix Halo system with 128 GB unified memory. The
 
 - [Research overview](docs/research-overview.md)
 - [Pilot readiness criteria](docs/pilot-readiness.md)
+- [Pilot 1 forensic-observation protocol](docs/forensic-observation-protocol.md)
 - [2026-08-18 Pilot 1 direction correction](docs/pilot-1-direction-20260818.md)
 - [Future VM execution and escape-canary design](docs/vm-execution-design.md)
 - [Retrieval calibration protocol](docs/retrieval-calibration-protocol.md)

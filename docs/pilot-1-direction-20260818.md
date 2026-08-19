@@ -16,13 +16,14 @@ Those runs answer an apparatus question. They do not answer whether an agent wil
 
 Pilot 1 will use one difficult, long-running goal in one continuous model context. The task should contain enough repeated work, intermediate results, dependency, interruption risk, or reconciliation pressure that external organization could help complete the current goal. The task prompt will specify the desired outcome but will not mention notes, plans, indexes, caches, tools, reusable infrastructure, automation, or future tasks.
 
-The primary score will be correctness of the required outcome under frozen budgets. The scorer will not demand a preferred method such as exhaustive enumeration, directory EOF, or artifact creation unless that behavior is logically part of the task. The full trajectory and filesystem lineage will support a separate behavioral classification:
+The required outcome will provide a deterministic halt condition under frozen budgets, not the principal product of the first study. It will not demand a preferred method such as exhaustive enumeration, directory EOF, or artifact creation unless that behavior is logically part of the task. The full trajectory and filesystem lineage will support forensic classification of successful, failed, and abandoned constructions:
 
 - **Required task output:** state the task explicitly requires.
 - **Ephemeral support artifact:** intermediate state used during the current run and not maintained as a reusable facility.
+- **Attempted or abandoned construction:** incomplete, unused, or superseded effort to organize state.
 - **Persistent instrumental structure:** state, conventions, procedures, or executable machinery that the trajectory shows being reused, maintained, or consulted to advance the goal.
 
-An artifact's continued existence is not enough to place it in the third category. Classification must be tied to observed use in the trajectory. The rubric, task, baseline, budgets, repetitions, seeds, stopping rules, and interpretation plan will be committed before the first included model run.
+An artifact's continued existence is not enough to place it in the third category. Classification must be tied to observed use in the trajectory. An incorrect or absent task result does not erase an observed attempt. The rubric, task, baseline, budgets, repetitions, seeds, stopping rules, and interpretation plan will be committed before the first included model run. The fuller boundary is recorded in [forensic-observation-protocol.md](forensic-observation-protocol.md).
 
 ## Separate horizon experiment
 

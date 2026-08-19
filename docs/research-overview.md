@@ -14,7 +14,7 @@ The empirical question is not simply whether an agent creates files. Agents rout
 
 Hammer places a capable model in a deliberately sparse Linux environment. The experimental container has persistent writable state but no network, shell, compiler, package manager, or ordinary userspace. A small static process exposes individual filesystem syscalls through a constrained action protocol. Model communication, fixture creation, scoring, and observation remain in the host-side harness rather than appearing as agent-facing capabilities.
 
-The model is not instructed to create tools and is not rewarded merely for leaving artifacts. The harness records each model response, requested action, syscall result, token and context measurement, and before/after filesystem state. This allows a result to be evaluated at three levels: whether the task was solved, what structures appeared, and what the trajectory shows those structures actually did.
+The model is not instructed to create tools and is not rewarded merely for leaving artifacts. The harness records each model response, requested action, syscall result, token and context measurement, and before/after filesystem state. The first pilot treats the task result as a finite halt condition; its primary product is a reconstruction of what structures appeared, were attempted, were abandoned, and what the trajectory shows they actually did.
 
 The current Pilot 1 direction uses one difficult, long-running goal in one continuous context. This corrects an early design in which fresh model contexts received independent retrieval tasks while the experimenter, but not the model, knew that more tasks would follow. Infrastructure for an unknown successor was not rationally useful to the acting model. Pilot 1 instead asks whether external structure emerges when it can help solve the current objective.
 
@@ -33,13 +33,14 @@ These questions include negative results. A capable model may solve the task dir
 
 ## Evidence and interpretation
 
-Hammer distinguishes three broad artifact classes before included research runs:
+Hammer distinguishes broad artifact classes before included research runs:
 
 - **Required task output:** state explicitly demanded by the task.
 - **Ephemeral support artifact:** intermediate state used during the current run without evidence that it became a reusable facility.
+- **Attempted or abandoned construction:** incomplete, unused, or superseded effort to organize state.
 - **Persistent instrumental structure:** state, conventions, procedures, or executable machinery that the trajectory shows being reused, maintained, or consulted to advance the goal.
 
-Continued existence is not enough for the third category. Classification must be grounded in the action trajectory and filesystem lineage. Task success is scored independently from the strategy: the pilot will not require an index, a note, exhaustive enumeration, or any other preferred behavior unless it is logically part of the task itself.
+Continued existence is not enough for the third category. Classification must be grounded in the action trajectory and filesystem lineage. A task result closes the observation window but will not require an index, a note, exhaustive enumeration, or any other preferred behavior unless it is logically part of the task itself. The current continuous transcript also means that Pilot 1 cannot establish that external state extends memory or context; that requires a separate treatment.
 
 The initial work is a bounded pilot, not an attempt to demonstrate an agent-designed operating system. Its purpose is to establish whether this behavior can be studied reproducibly, identify the conditions and controls needed for a stronger experiment, and clarify which safety claims the evidence can and cannot support.
 
