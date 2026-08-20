@@ -24,6 +24,7 @@ Future experiment families should use the same compact form: an uppercase family
 | Thinking checkpoint positive control | One calibration run completed | Qwen replayed returned thinking through the host protocol and passed an explicitly required checkpoint reread. Native token counts and thinking-character counts are recorded separately. |
 | Thinking external-state ladder | 1,024-cap pair and 4,096-cap bridge recorded | Both caps hit reasoning-cap empty-content failures before testing preservation. The larger cap delayed the failure but did not yield a completed action trajectory, so its goal-only partner was not run. |
 | Thinking temporal-sequencing control | Apparatus calibration complete | The first model trajectory exposed a snapshot-field scorer false negative; the corrected seed-3702 member passed every temporal, exact-byte, transcript-loss, and isolation check. |
+| Thinking no-idle bridge | Frozen, not yet run | A representation-unspecified but explicitly solicited bridge removes the earlier forced-idle interval and tests support-versus-final-output semantics. |
 | Future experiment register | Design notes only | Candidate terminal-feedback treatments and their interpretation boundaries are preserved separately from observed runs. |
 
 ## Read in this order
@@ -41,8 +42,9 @@ Future experiment families should use the same compact form: an uppercase family
 11. [Thinking-response positive control](thinking-positive-control-protocol.md) and its [result](thinking-positive-control-results-20260820.md) — the explicit checkpoint calibration for native reasoning continuity.
 12. [Thinking external-state ladder](thinking-external-state-ladder-protocol.md) and its [result](thinking-external-state-ladder-results-20260820.md) — the representation-unspecified bridge, goal-only step-down, and response-cap boundary.
 13. [Thinking temporal-sequencing control](thinking-temporal-control-protocol.md) and its [result](thinking-temporal-control-results-20260820.md) — the explicit no-idle temporal and compaction positive control.
-14. [Future experiment register](future-experiment-register.md) — candidate treatments retained for later design and review, not results.
-15. [VM execution design](vm-execution-design.md) — the separate future condition for native self-authored execution.
+14. [Thinking no-idle bridge](thinking-no-idle-bridge-protocol.md) — the representation-unspecified bridge semantic calibration.
+15. [Future experiment register](future-experiment-register.md) — candidate treatments retained for later design and review, not results.
+16. [VM execution design](vm-execution-design.md) — the separate future condition for native self-authored execution.
 
 ## Reading a run
 
