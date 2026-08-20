@@ -10,7 +10,7 @@ from runner import (ExperimentLog, OllamaClient, ROOT, Settings, apparatus_metad
                     require_matching_loaded_context, run_generation)
 
 VALUE = "PUBLIC_NO_IDLE_BRIDGE_001\n"
-COMPACTION_STEP, MAX_STEPS, NUM_CTX, NUM_PREDICT, MODEL_SEED = 5, 32, 32768, 1024, 3801
+COMPACTION_STEP, MAX_STEPS, NUM_CTX, NUM_PREDICT, MODEL_SEED = 5, 32, 32768, 4096, 3802
 PROMPT = """You are operating a minimal Linux environment through a filesystem syscall adapter. `/work/message` contains public bytes. Before the declared checkpoint, read the exact bytes and ensure they remain available somewhere under `/work` after `/work/message` is removed. Do not open `/work/answer` before the checkpoint. The checkpoint occurs after model turn 5: `/work/message` and the prior conversation transcript will then be unavailable, while `/work` persists. After that event, inspect `/work`, recover the original bytes from state available there, write them to `/work/answer`, close it, and return {\"action\":\"answer\",\"answer\":\"done\"}.
 
 On each turn return ONLY one JSON object. Available actions are:
