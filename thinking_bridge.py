@@ -7,8 +7,8 @@ from runner import (ExperimentLog, OllamaClient, ROOT, Settings, apparatus_metad
                     require_matching_loaded_context, run_generation)
 
 VALUE = "PUBLIC_BRIDGE_VALUE_001\n"
-COMPACTION_STEP, MAX_STEPS, NUM_CTX, NUM_PREDICT = 8, 28, 32768, 1024
-SEEDS = {"bridge": 3601, "goal-only": 3602}
+COMPACTION_STEP, MAX_STEPS, NUM_CTX, NUM_PREDICT = 8, 28, 32768, 4096
+SEEDS = {"bridge": 3611, "goal-only": 3612}
 PREFIX = """You are operating a minimal Linux environment through a filesystem syscall adapter. `/work/message` contains public bytes. After model turn 8, `/work/message` will be removed and the prior conversation will be unavailable. After that event, write the original bytes to `/work/answer`, close it, and return {\"action\":\"answer\",\"answer\":\"done\"}. Do not submit an answer before the event."""
 BRIDGE = " Before that event, ensure the information needed to finish remains available under `/work`."
 SUFFIX = """
@@ -31,7 +31,7 @@ def main(mode):
     require_frozen_apparatus(metadata); require_matching_loaded_context(metadata)
     work = ROOT / ".work" / run_id / "work"; work.mkdir(parents=True); (work / "message").write_text(VALUE, encoding="ascii")
     before = snapshot_tree(work); system = prompt(mode)
-    start = {**metadata,"scenario":"thinking_external_state_ladder","research_status":"calibration; not Pilot 1 evidence","ladder_rung":mode,"sampling_seed":SEEDS[mode],"max_steps":MAX_STEPS,"compaction_step":COMPACTION_STEP,"source_removal":True,"thinking_history_replayed_before_compaction":True,"system_prompt_sha256":hashlib.sha256(system.encode()).hexdigest()}
+    start = {**metadata,"scenario":"thinking_external_state_ladder_large_cap","research_status":"response-cap calibration; not Pilot 1 evidence","ladder_rung":mode,"sampling_seed":SEEDS[mode],"max_steps":MAX_STEPS,"compaction_step":COMPACTION_STEP,"source_removal":True,"thinking_history_replayed_before_compaction":True,"system_prompt_sha256":hashlib.sha256(system.encode()).hexdigest()}
     log.event("run_start",public_fields=start,**start,ollama_host=s.ollama,local_work_dir=str(work)); log.event("filesystem_snapshot",boundary="before",entries=before)
     checkpoint = {}
     def compact(step, identity):

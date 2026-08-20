@@ -22,7 +22,7 @@ Future experiment families should use the same compact form: an uppercase family
 | D96 dependency ordering | One unreplicated candidate observation | The scripted baseline passed. The model read 48 of 96 records, wrote an invalid required answer, and ended with 376 turns unused; it created no support state. |
 | D96 terminal semantics | Six-member calibration completed | Both blind arms failed. Explicit finality was associated with an earlier invalid submission, but seed assignment is confounded with wording, so no causal comparison is claimed. |
 | Thinking checkpoint positive control | One calibration run completed | Qwen replayed returned thinking through the host protocol and passed an explicitly required checkpoint reread. Native token counts and thinking-character counts are recorded separately. |
-| Thinking external-state ladder | Two-member calibration completed | Both members hit repeated reasoning-cap empty-content failures before testing the intended preservation contrast; no causal externalization claim is made. |
+| Thinking external-state ladder | 1,024-cap pair complete; 4,096-cap pair frozen | The first pair hit repeated reasoning-cap empty-content failures before testing preservation; the larger-cap condition is a separate calibration. |
 | Future experiment register | Design notes only | Candidate terminal-feedback treatments and their interpretation boundaries are preserved separately from observed runs. |
 
 ## Read in this order
