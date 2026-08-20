@@ -26,3 +26,7 @@ An initial member was accidentally launched with a 1,024-token response cap and 
 A pass requires an exact unnamed support file in the boundary snapshot, no pre-boundary answer open, an observed post-boundary directory inspection and support reread, exact final bytes, terminal `done`, and the standard isolation checks. This is still an explicitly solicited preservation bridge. It can show that the condition is mechanically and semantically usable; it cannot show spontaneous construction or isolate a causal bridge-prompt effect.
 
 The close-triggered member passed. See [results](thinking-no-idle-bridge-results-20260820.md).
+
+## Non-thinking ablation
+
+The same close-triggered bridge is run with `think:false`, seed 3804, and every other task, adapter, context, response-cap, action-budget, fixture, and scoring setting unchanged. The fresh seed follows calibration practice: disabling thinking changes the response protocol. This is a one-member descriptive ablation, not a causal performance estimate.

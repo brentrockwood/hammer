@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Representation-unspecified bridge calibration without a forced idle interval."""
+import argparse
 import hashlib
 import json
 import traceback
@@ -10,7 +11,9 @@ from runner import (ExperimentLog, OllamaClient, ROOT, Settings, apparatus_metad
                     require_matching_loaded_context, run_generation)
 
 VALUE = "PUBLIC_NO_IDLE_BRIDGE_001\n"
-MAX_STEPS, NUM_CTX, NUM_PREDICT, MODEL_SEED = 32, 32768, 4096, 3803
+MAX_STEPS, NUM_CTX, NUM_PREDICT = 32, 32768, 4096
+VARIANTS = {"thinking": {"seed": 3803, "think": True},
+            "nonthinking": {"seed": 3804, "think": False}}
 PROMPT = """You are operating a minimal Linux environment through a filesystem syscall adapter. `/work/message` contains public bytes. Before the declared checkpoint, read the exact bytes and ensure they remain available somewhere under `/work` after `/work/message` is removed. Do not open `/work/answer` before the checkpoint. The checkpoint occurs immediately after you close the file that preserves the source bytes: `/work/message` and the prior conversation transcript will then be unavailable, while `/work` persists. After that event, inspect `/work`, recover the original bytes from state available there, write them to `/work/answer`, close it, and return {\"action\":\"answer\",\"answer\":\"done\"}.
 
 On each turn return ONLY one JSON object. Available actions are:
@@ -33,10 +36,11 @@ def requests(records, compaction_step, *, after=False):
             (row["step"] > compaction_step if after else row["step"] <= compaction_step)]
 
 
-def main():
+def main(variant):
+    frozen = VARIANTS[variant]
     settings = Settings()
-    expected = {"model": "qwen3.6:35b", "seed": MODEL_SEED, "temperature": 0,
-                "num_ctx": NUM_CTX, "num_predict": NUM_PREDICT, "think": True}
+    expected = {"model": "qwen3.6:35b", "seed": frozen["seed"], "temperature": 0,
+                "num_ctx": NUM_CTX, "num_predict": NUM_PREDICT, "think": frozen["think"]}
     if ({key: getattr(settings, key) for key in expected} != expected
             or settings.max_steps != MAX_STEPS):
         raise SystemExit("thinking no-idle bridge frozen settings mismatch")
@@ -50,11 +54,11 @@ def main():
     (work / "message").write_text(VALUE, encoding="ascii")
     before = snapshot_tree(work)
     start = {
-        **metadata, "scenario": "thinking_no_idle_bridge", "research_status": "bridge semantic calibration; not Pilot 1 evidence",
-        "sampling_seed": MODEL_SEED, "max_steps": MAX_STEPS,
+        **metadata, "scenario": f"{variant}_no_idle_bridge", "research_status": "bridge semantic calibration; not Pilot 1 evidence",
+        "sampling_seed": frozen["seed"], "max_steps": MAX_STEPS,
         "compaction_trigger": "close of model-created non-answer writable support file",
         "fixture_value_sha256": hashlib.sha256(VALUE.encode()).hexdigest(),
-        "thinking_history_replayed_before_compaction": True,
+        "thinking_history_replayed_before_compaction": frozen["think"],
         "system_prompt_sha256": hashlib.sha256(PROMPT.encode()).hexdigest(),
     }
     log.event("run_start", public_fields=start, **start, ollama_host=settings.ollama,
@@ -131,14 +135,14 @@ def main():
         log.event("filesystem_snapshot", boundary="after", entries=snapshot_tree(work))
         log.event("run_end", passed=all(checks.values()), checks=checks)
         report = log.write_report(
-            title="Thinking no-idle bridge calibration",
-            question="Can the thinking-enabled agent distinguish an unnamed pre-boundary support artifact from final output when the available pre-boundary actions are sufficient to create it?",
+            title=f"{variant.title()} no-idle bridge calibration",
+            question="Can the agent distinguish an unnamed pre-boundary support artifact from final output when the available pre-boundary actions are sufficient to create it?",
             method="The bridge prompt requires exact bytes to remain somewhere under `/work`, prohibits opening the final answer early, and compacts immediately after the model closes its self-chosen writable support file. The post-boundary model must inspect the directory, read a surviving artifact, and create the final answer.",
             result=f"Terminal response: `{answer}`; exact support at boundary: `{bool(support)}`; exact final answer: `{final == VALUE}`.",
             interpretation="This is an explicitly solicited bridge calibration. A successful support artifact would establish temporal semantic compliance under this interface, not spontaneous tool or affordance construction.",
         )
         report.open("a").write("\n## Forensic reading\n\n" + json.dumps(observations, sort_keys=True) + "\n")
-        print("THINKING NO-IDLE BRIDGE:", "PASS" if all(checks.values()) else "FAIL")
+        print(f"{variant.upper()} NO-IDLE BRIDGE:", "PASS" if all(checks.values()) else "FAIL")
         print("PUBLIC RECORD:", log.public_path)
         print("HUMAN REPORT:", report)
         return 0 if all(checks.values()) else 2
@@ -150,4 +154,6 @@ def main():
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--variant", choices=tuple(VARIANTS), required=True)
+    raise SystemExit(main(parser.parse_args().variant))
