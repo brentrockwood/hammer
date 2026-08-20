@@ -2,7 +2,7 @@
 
 ## Status
 
-Frozen apparatus calibration. This is not Pilot 1 and does not test spontaneous externalization.
+Completed apparatus calibration. This is not Pilot 1 and does not test spontaneous externalization.
 
 ## Question
 
@@ -27,6 +27,8 @@ The public trajectory retains reasoning and ordinary response fields, accepted a
 ## Interpretation boundary
 
 This is a positive control for temporal semantics, compaction behavior, and response transport. It deliberately prescribes the intermediate representation and therefore cannot support a claim about self-authored affordances. A failure would diagnose the reasoning/action protocol before another non-prescriptive external-state task is attempted.
+
+The scorer-corrected member passed. See [results](thinking-temporal-control-results-20260820.md).
 
 ## Scoring revision after the first member
 

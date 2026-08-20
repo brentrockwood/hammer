@@ -23,7 +23,7 @@ Future experiment families should use the same compact form: an uppercase family
 | D96 terminal semantics | Six-member calibration completed | Both blind arms failed. Explicit finality was associated with an earlier invalid submission, but seed assignment is confounded with wording, so no causal comparison is claimed. |
 | Thinking checkpoint positive control | One calibration run completed | Qwen replayed returned thinking through the host protocol and passed an explicitly required checkpoint reread. Native token counts and thinking-character counts are recorded separately. |
 | Thinking external-state ladder | 1,024-cap pair and 4,096-cap bridge recorded | Both caps hit reasoning-cap empty-content failures before testing preservation. The larger cap delayed the failure but did not yield a completed action trajectory, so its goal-only partner was not run. |
-| Thinking temporal-sequencing control | First member recorded; scoring-corrected member frozen | The first model trajectory completed the sequence but exposed a snapshot-field scorer false negative. The corrected, separately seeded member is the actual apparatus check. |
+| Thinking temporal-sequencing control | Apparatus calibration complete | The first model trajectory exposed a snapshot-field scorer false negative; the corrected seed-3702 member passed every temporal, exact-byte, transcript-loss, and isolation check. |
 | Future experiment register | Design notes only | Candidate terminal-feedback treatments and their interpretation boundaries are preserved separately from observed runs. |
 
 ## Read in this order
@@ -40,7 +40,7 @@ Future experiment families should use the same compact form: an uppercase family
 10. [D96 forensic addendum](d96-forensic-addendum-20260820.md), [terminal-semantics protocol](d96-terminal-semantics-protocol.md), and [six-member results](d96-terminal-semantics-results-20260820.md) — the post-hoc diagnostic, frozen blind-terminal follow-up, and its bounded result.
 11. [Thinking-response positive control](thinking-positive-control-protocol.md) and its [result](thinking-positive-control-results-20260820.md) — the explicit checkpoint calibration for native reasoning continuity.
 12. [Thinking external-state ladder](thinking-external-state-ladder-protocol.md) and its [result](thinking-external-state-ladder-results-20260820.md) — the representation-unspecified bridge, goal-only step-down, and response-cap boundary.
-13. [Thinking temporal-sequencing control](thinking-temporal-control-protocol.md) — the explicit no-idle temporal and compaction positive control.
+13. [Thinking temporal-sequencing control](thinking-temporal-control-protocol.md) and its [result](thinking-temporal-control-results-20260820.md) — the explicit no-idle temporal and compaction positive control.
 14. [Future experiment register](future-experiment-register.md) — candidate treatments retained for later design and review, not results.
 15. [VM execution design](vm-execution-design.md) — the separate future condition for native self-authored execution.
 
