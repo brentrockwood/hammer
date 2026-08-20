@@ -2,7 +2,7 @@
 
 ## Status
 
-Frozen bridge semantic calibration. It is not Pilot 1 and does not test spontaneous externalization.
+Completed bridge semantic calibration. It is not Pilot 1 and does not test spontaneous externalization.
 
 ## Question
 
@@ -24,3 +24,5 @@ An initial member was accidentally launched with a 1,024-token response cap and 
 ## Scoring and interpretation
 
 A pass requires an exact unnamed support file in the boundary snapshot, no pre-boundary answer open, an observed post-boundary directory inspection and support reread, exact final bytes, terminal `done`, and the standard isolation checks. This is still an explicitly solicited preservation bridge. It can show that the condition is mechanically and semantically usable; it cannot show spontaneous construction or isolate a causal bridge-prompt effect.
+
+The close-triggered member passed. See [results](thinking-no-idle-bridge-results-20260820.md).
