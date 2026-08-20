@@ -9,7 +9,9 @@ from c48 import continuation_message, treatment_prompt
 from dependency_task import generate_fixture as generate_dependency_fixture
 from dependency_task import validate_answer as validate_dependency_answer
 from graph_task import generate_graph, validate_answer, write_fixture
-from runner import AgentContainer, ROOT, run_generation
+from runner import (
+    AgentContainer, ROOT, require_matching_loaded_context, run_generation,
+)
 from retrieval import generation_observations
 
 
@@ -281,6 +283,17 @@ class ApparatusTest(unittest.TestCase):
         self.assertEqual(len(rejected), 1)
         self.assertIsNone(rejected[0]["rejection"]["syscall"])
         self.assertFalse(any(event["event"] == "generation_error" for event in log.events))
+
+    def test_model_run_rejects_loaded_context_mismatch(self):
+        with self.assertRaisesRegex(RuntimeError, "requested 65536, loaded 32768"):
+            require_matching_loaded_context({
+                "inference_options": {"num_ctx": 65536},
+                "server_environment": {"model_loaded_context": 32768},
+            })
+        require_matching_loaded_context({
+            "inference_options": {"num_ctx": 32768},
+            "server_environment": {"model_loaded_context": 32768},
+        })
 
     def test_compaction_replaces_history_and_records_exact_continuation(self):
         log = MemoryLog()

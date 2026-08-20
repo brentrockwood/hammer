@@ -300,6 +300,22 @@ def require_frozen_apparatus(metadata):
     )
 
 
+def require_matching_loaded_context(metadata):
+    """Reject a model run when Ollama's active context differs from the request.
+
+    Ollama options describe the requested context, but a model already resident on
+    the server can retain a different loaded context. Treat that as an apparatus
+    mismatch rather than silently normalizing usage against an unavailable window.
+    """
+    requested = metadata.get("inference_options", {}).get("num_ctx")
+    loaded = metadata.get("server_environment", {}).get("model_loaded_context")
+    if requested is None or loaded != requested:
+        raise RuntimeError(
+            "scientific model run requires the requested context to match the "
+            f"active Ollama model context; requested {requested}, loaded {loaded}"
+        )
+
+
 def public_error(error, settings=None):
     """Retain useful failure text without publishing local paths or endpoints."""
     message = str(error).replace(str(ROOT), "[REPOSITORY]")
