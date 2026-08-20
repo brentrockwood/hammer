@@ -24,7 +24,7 @@ Future experiment families should use the same compact form: an uppercase family
 | Thinking checkpoint positive control | One calibration run completed | Qwen replayed returned thinking through the host protocol and passed an explicitly required checkpoint reread. Native token counts and thinking-character counts are recorded separately. |
 | Thinking external-state ladder | 1,024-cap pair and 4,096-cap bridge recorded | Both caps hit reasoning-cap empty-content failures before testing preservation. The larger cap delayed the failure but did not yield a completed action trajectory, so its goal-only partner was not run. |
 | Thinking temporal-sequencing control | Apparatus calibration complete | The first model trajectory exposed a snapshot-field scorer false negative; the corrected seed-3702 member passed every temporal, exact-byte, transcript-loss, and isolation check. |
-| Thinking no-idle bridge | Thinking member complete; non-thinking ablation frozen | After a grammar and fixed-turn failure, the close-triggered 4K-cap thinking member created, rediscovered, read, and used a self-named support file across transcript loss. The same task with `think:false` is a separate descriptive member. |
+| Thinking no-idle bridge | Thinking and non-thinking members complete | Both corrected close-triggered members created, rediscovered, read, and used self-named support files across transcript loss. The small descriptive pair does not estimate a reasoning effect. |
 | Future experiment register | Design notes only | Candidate terminal-feedback treatments and their interpretation boundaries are preserved separately from observed runs. |
 
 ## Read in this order
