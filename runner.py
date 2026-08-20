@@ -64,7 +64,7 @@ def git_commit():
 
 APPARATUS_PATHS = (
     ".dockerignore", "Dockerfile", "compose.yaml", "Makefile", "agent.c", "runner.py",
-    "harness.py", "persistence.py", "retrieval.py", "c48.py", "append_calibration.py", "d96.py", "d96_terminal.py", "corpus.py",
+    "harness.py", "persistence.py", "retrieval.py", "c48.py", "append_calibration.py", "d96.py", "d96_terminal.py", "thinking_probe.py", "corpus.py",
     "graph_task.py", "dependency_task.py", "tests",
     "fixtures", "infrastructure",
 )
@@ -264,6 +264,8 @@ class OllamaClient:
             "done_reason": data.get("done_reason"),
             "created_at": data.get("created_at"),
             "wall_seconds": wall_seconds,
+            "thinking_characters": len(data.get("message", {}).get("thinking", "")),
+            "content_characters": len(data.get("message", {}).get("content", "")),
         }
         prompt_tokens = usage["prompt_tokens"] or 0
         completion_tokens = usage["completion_tokens"] or 0
@@ -332,6 +334,14 @@ def parse_action(text):
         if not match:
             raise
         return json.loads(match.group(0))
+
+
+def assistant_history_message(message):
+    """Preserve the native assistant fields that Ollama accepts on the next turn."""
+    history_message = {"role": "assistant", "content": message.get("content", "")}
+    if message.get("thinking"):
+        history_message["thinking"] = message["thinking"]
+    return history_message
 
 
 class AgentContainer:
@@ -482,7 +492,7 @@ def run_generation(
                     rejection=rejection,
                 )
                 history += [
-                    {"role": "assistant", "content": model_text},
+                    assistant_history_message(message),
                     {
                         "role": "user",
                         "content": (
@@ -510,7 +520,7 @@ def run_generation(
                         rejection=rejection,
                     )
                     history += [
-                        {"role": "assistant", "content": model_text},
+                        assistant_history_message(message),
                         {
                             "role": "user",
                             "content": (
@@ -540,7 +550,7 @@ def run_generation(
             )
             print(f"[g{generation}:{step}] agent: {json.dumps(result, separators=(',', ':'))}")
             history += [
-                {"role": "assistant", "content": model_text},
+                assistant_history_message(message),
                 {"role": "user", "content": "syscall result: " + json.dumps(result)},
             ]
             if usage["context_utilization"] >= 0.9:

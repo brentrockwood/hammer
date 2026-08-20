@@ -10,9 +10,7 @@ from d96_terminal import ARM_SEEDS, EXPLICIT_FINALITY, prompt_for
 from dependency_task import generate_fixture as generate_dependency_fixture
 from dependency_task import validate_answer as validate_dependency_answer
 from graph_task import generate_graph, validate_answer, write_fixture
-from runner import (
-    AgentContainer, ROOT, require_matching_loaded_context, run_generation,
-)
+from runner import AgentContainer, ROOT, assistant_history_message, require_matching_loaded_context, run_generation
 from retrieval import generation_observations
 
 
@@ -295,6 +293,10 @@ class ApparatusTest(unittest.TestCase):
             "inference_options": {"num_ctx": 32768},
             "server_environment": {"model_loaded_context": 32768},
         })
+
+    def test_thinking_field_is_replayed_in_assistant_history(self):
+        message = {"role": "assistant", "thinking": "inspect state", "content": '{"action":"answer","answer":"done"}'}
+        self.assertEqual(assistant_history_message(message), message)
 
     def test_compaction_replaces_history_and_records_exact_continuation(self):
         log = MemoryLog()
