@@ -20,6 +20,7 @@ Future experiment families should use the same compact form: an uppercase family
 | C48 H0 / H12 | One exploratory continuity-window pair | With the same fixture, seed, model settings, and budgets, H0 made no write attempt; H12 created one invalid candidate answer after checkpoint 1 and did not reuse it. One pair does not identify the cause of that difference or establish persistence. |
 | C48 append affordance | One exploratory pair recorded | Scripted append calibration passed. The append-visible member did not request append or create state, but its action trajectory differed from the control. One pair does not isolate why. |
 | D96 dependency ordering | One unreplicated candidate observation | The scripted baseline passed. The model read 48 of 96 records, wrote an invalid required answer, and ended with 376 turns unused; it created no support state. |
+| Future experiment register | Design notes only | Candidate terminal-feedback treatments and their interpretation boundaries are preserved separately from observed runs. |
 
 ## Read in this order
 
@@ -32,7 +33,8 @@ Future experiment families should use the same compact form: an uppercase family
 7. [C48 continuity-window protocol](c48-continuity-window-protocol.md), [H0 report](../runs/c48-h0-20260819T165510Z.md), and [H12 report](../runs/c48-h12-20260819T201228Z.md) — the full-reset and 12-exchange-tail exploratory pair.
 8. [C48 append-affordance protocol](c48-append-affordance-protocol.md), [scripted calibration](../runs/append-calibration-20260819T211522Z.md), [control](../runs/c48-append-h0-control-20260819T211551Z.md), and [append-visible member](../runs/c48-append-h0-append-20260819T213005Z.md) — the completed small mechanism ablation.
 9. [D96 protocol](pilot-d96-dependency-ordering-protocol.md), [scripted baseline](../runs/d96-scripted-20260820T004209Z.md), and [candidate observation](../runs/d96-pilot-candidate-20260820T004248Z.md) — the continuous-context task and its first task-level failure trajectory.
-10. [VM execution design](vm-execution-design.md) — the separate future condition for native self-authored execution.
+10. [Future experiment register](future-experiment-register.md) — candidate treatments retained for later design and review, not results.
+11. [VM execution design](vm-execution-design.md) — the separate future condition for native self-authored execution.
 
 ## Reading a run
 
