@@ -6,6 +6,7 @@ from unittest.mock import patch
 
 from corpus import TARGET, add_records, expected_filenames, generate_corpus
 from c48 import continuation_message, treatment_prompt
+from d96_terminal import ARM_SEEDS, EXPLICIT_FINALITY, prompt_for
 from dependency_task import generate_fixture as generate_dependency_fixture
 from dependency_task import validate_answer as validate_dependency_answer
 from graph_task import generate_graph, validate_answer, write_fixture
@@ -375,6 +376,16 @@ class ApparatusTest(unittest.TestCase):
             "\n".join(reversed(fixture.reference_order)) + "\n", fixture
         )
         self.assertFalse(invalid)
+
+    def test_d96_terminal_arms_differ_only_by_finality_sentence(self):
+        self.assertEqual(ARM_SEEDS["original"], (3402, 3403, 3404))
+        self.assertEqual(ARM_SEEDS["explicit-finality"], (3411, 3412, 3413))
+        self.assertEqual(
+            prompt_for("explicit-finality"),
+            prompt_for("original").replace(
+                "\n\nOn each turn", EXPLICIT_FINALITY + "\n\nOn each turn",
+            ),
+        )
 
 
 if __name__ == "__main__":
