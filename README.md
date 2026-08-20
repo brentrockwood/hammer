@@ -93,6 +93,7 @@ Pilot runs use a dedicated AMD Strix Halo system with 128 GB unified memory. The
 - [C48 horizon-information follow-up protocol](docs/c48-horizon-information-protocol.md)
 - [C48 continuity-window pair protocol](docs/c48-continuity-window-protocol.md)
 - [C48 append-affordance ablation protocol](docs/c48-append-affordance-protocol.md)
+- [D96 continuous dependency-ordering pilot candidate](docs/pilot-d96-dependency-ordering-protocol.md)
 - [Pilot 1 task-selection draft](docs/pilot-1-task-selection.md)
 - [Pilot 1 live-reconciliation semantic task draft](docs/pilot-1-live-reconciliation-spec.md)
 - [Live-reconciliation adversarial review and rejection](docs/pilot-1-live-reconciliation-adversarial-review.md)

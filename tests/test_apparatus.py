@@ -6,6 +6,8 @@ from unittest.mock import patch
 
 from corpus import TARGET, add_records, expected_filenames, generate_corpus
 from c48 import continuation_message, treatment_prompt
+from dependency_task import generate_fixture as generate_dependency_fixture
+from dependency_task import validate_answer as validate_dependency_answer
 from graph_task import generate_graph, validate_answer, write_fixture
 from runner import AgentContainer, ROOT, run_generation
 from retrieval import generation_observations
@@ -347,6 +349,18 @@ class ApparatusTest(unittest.TestCase):
         valid, reason = validate_answer("\n".join(fixture.backbone) + "\n", fixture)
         self.assertTrue(valid, reason)
         invalid, _ = validate_answer("\n".join(reversed(fixture.backbone)) + "\n", fixture)
+        self.assertFalse(invalid)
+
+    def test_d96_fixture_and_dependency_validator(self):
+        fixture = generate_dependency_fixture(20260820)
+        self.assertEqual(len(fixture.nodes), 96)
+        valid, reason = validate_dependency_answer(
+            "\n".join(fixture.reference_order) + "\n", fixture
+        )
+        self.assertTrue(valid, reason)
+        invalid, _ = validate_dependency_answer(
+            "\n".join(reversed(fixture.reference_order)) + "\n", fixture
+        )
         self.assertFalse(invalid)
 
 
