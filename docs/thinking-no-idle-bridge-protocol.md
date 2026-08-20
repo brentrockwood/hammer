@@ -29,4 +29,6 @@ The close-triggered member passed. See [results](thinking-no-idle-bridge-results
 
 ## Non-thinking ablation
 
-The same close-triggered bridge is run with `think:false`, seed 3804, and every other task, adapter, context, response-cap, action-budget, fixture, and scoring setting unchanged. The fresh seed follows calibration practice: disabling thinking changes the response protocol. This is a one-member descriptive ablation, not a causal performance estimate.
+The same close-triggered bridge is run with `think:false`, seed 3805, and every other task, adapter, context, response-cap, action-budget, fixture, and scoring setting unchanged. The fresh seed follows calibration practice: disabling thinking changes the response protocol. This is a one-member descriptive ablation, not a causal performance estimate.
+
+The initial non-thinking member (seed 3804) completed the filesystem task but exposed a dynamic-trigger defect: recycled descriptor numbers caused a second compaction. It remains a failed scorer record. The one-shot trigger correction advances the member to seed 3805.

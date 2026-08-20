@@ -431,6 +431,8 @@ def run_generation(
     usages = []
 
     def compact_if_needed(step, action=None, result=None):
+        if required_compactions is not None and len(completed_compactions) >= required_compactions:
+            return
         triggered = step in compaction_steps or (
             compaction_predicate is not None and compaction_predicate(step, action, result)
         )

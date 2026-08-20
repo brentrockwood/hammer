@@ -13,7 +13,7 @@ from runner import (ExperimentLog, OllamaClient, ROOT, Settings, apparatus_metad
 VALUE = "PUBLIC_NO_IDLE_BRIDGE_001\n"
 MAX_STEPS, NUM_CTX, NUM_PREDICT = 32, 32768, 4096
 VARIANTS = {"thinking": {"seed": 3803, "think": True},
-            "nonthinking": {"seed": 3804, "think": False}}
+            "nonthinking": {"seed": 3805, "think": False}}
 PROMPT = """You are operating a minimal Linux environment through a filesystem syscall adapter. `/work/message` contains public bytes. Before the declared checkpoint, read the exact bytes and ensure they remain available somewhere under `/work` after `/work/message` is removed. Do not open `/work/answer` before the checkpoint. The checkpoint occurs immediately after you close the file that preserves the source bytes: `/work/message` and the prior conversation transcript will then be unavailable, while `/work` persists. After that event, inspect `/work`, recover the original bytes from state available there, write them to `/work/answer`, close it, and return {\"action\":\"answer\",\"answer\":\"done\"}.
 
 On each turn return ONLY one JSON object. Available actions are:
