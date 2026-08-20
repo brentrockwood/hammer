@@ -411,7 +411,7 @@ def run_generation(
     log, client, generation, system_prompt, work_dir=None, max_steps=None,
     compaction_steps=(), require_compactions_before_answer=False,
     on_compaction=None, compaction_message=None, retain_history_turns=0,
-    agent_args=(),
+    agent_args=(), compaction_predicate=None, required_compactions=None,
 ):
     step_limit = max_steps or client.settings.max_steps
     container = AgentContainer(
@@ -424,12 +424,19 @@ def run_generation(
     )
     history = [{"role": "system", "content": system_prompt}]
     compaction_steps = tuple(compaction_steps)
+    required_compactions = (len(compaction_steps) if required_compactions is None
+                            else required_compactions)
     completed_compactions = []
     answer = None
     usages = []
 
-    def compact_if_needed(step):
-        if step not in compaction_steps:
+    def compact_if_needed(step, action=None, result=None):
+        triggered = step in compaction_steps or (
+            compaction_predicate is not None and compaction_predicate(step, action, result)
+        )
+        if not triggered:
+            return
+        if step in completed_compactions:
             return
         completed_compactions.append(step)
         checkpoint_index = len(completed_compactions)
@@ -506,7 +513,7 @@ def run_generation(
                 continue
             if action.get("action") == "answer":
                 if require_compactions_before_answer and (
-                    len(completed_compactions) != len(compaction_steps)
+                    len(completed_compactions) != required_compactions
                 ):
                     rejection = {
                         "ok": False,
@@ -558,7 +565,7 @@ def run_generation(
                     "context_pressure", generation=generation, step=step,
                     threshold=0.9, usage=usage,
                 )
-            compact_if_needed(step)
+            compact_if_needed(step, action, result)
         if answer is None:
             log.event(
                 "generation_exhausted", generation=generation,
