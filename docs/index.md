@@ -22,6 +22,7 @@ Future experiment families should use the same compact form: an uppercase family
 | D96 dependency ordering | One unreplicated candidate observation | The scripted baseline passed. The model read 48 of 96 records, wrote an invalid required answer, and ended with 376 turns unused; it created no support state. |
 | D96 terminal semantics | Six-member calibration completed | Both blind arms failed. Explicit finality was associated with an earlier invalid submission, but seed assignment is confounded with wording, so no causal comparison is claimed. |
 | Thinking checkpoint positive control | One calibration run completed | Qwen replayed returned thinking through the host protocol and passed an explicitly required checkpoint reread. Native token counts and thinking-character counts are recorded separately. |
+| Thinking external-state ladder | Frozen calibration; no members yet | A representation-unspecified bridge and matched goal-only step-down retain thinking before a declared source-removal boundary. |
 | Future experiment register | Design notes only | Candidate terminal-feedback treatments and their interpretation boundaries are preserved separately from observed runs. |
 
 ## Read in this order
@@ -37,8 +38,9 @@ Future experiment families should use the same compact form: an uppercase family
 9. [D96 protocol](pilot-d96-dependency-ordering-protocol.md), [scripted baseline](../runs/d96-scripted-20260820T004209Z.md), and [candidate observation](../runs/d96-pilot-candidate-20260820T004248Z.md) — the continuous-context task and its first task-level failure trajectory.
 10. [D96 forensic addendum](d96-forensic-addendum-20260820.md), [terminal-semantics protocol](d96-terminal-semantics-protocol.md), and [six-member results](d96-terminal-semantics-results-20260820.md) — the post-hoc diagnostic, frozen blind-terminal follow-up, and its bounded result.
 11. [Thinking-response positive control](thinking-positive-control-protocol.md) and its [result](thinking-positive-control-results-20260820.md) — the explicit checkpoint calibration for native reasoning continuity.
-12. [Future experiment register](future-experiment-register.md) — candidate treatments retained for later design and review, not results.
-13. [VM execution design](vm-execution-design.md) — the separate future condition for native self-authored execution.
+12. [Thinking external-state ladder](thinking-external-state-ladder-protocol.md) — the representation-unspecified preservation bridge and goal-only step-down.
+13. [Future experiment register](future-experiment-register.md) — candidate treatments retained for later design and review, not results.
+14. [VM execution design](vm-execution-design.md) — the separate future condition for native self-authored execution.
 
 ## Reading a run
 
