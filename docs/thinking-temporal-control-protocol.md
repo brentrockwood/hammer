@@ -10,7 +10,7 @@ Can the thinking-enabled response path carry an explicitly required intermediate
 
 ## Fixed condition
 
-- Model: `qwen3.6:35b`, `think:true`, temperature 0, seed 3701.
+- Model: `qwen3.6:35b`, `think:true`, temperature 0, seed 3702.
 - Requested and required loaded context: 32,768 tokens.
 - Per-response cap: 1,024 tokens; ordinary step limit: 24.
 - The fixture contains the public ASCII line `PUBLIC_TEMPORAL_CHECKPOINT_001` in `/work/message`.
@@ -27,3 +27,7 @@ The public trajectory retains reasoning and ordinary response fields, accepted a
 ## Interpretation boundary
 
 This is a positive control for temporal semantics, compaction behavior, and response transport. It deliberately prescribes the intermediate representation and therefore cannot support a claim about self-authored affordances. A failure would diagnose the reasoning/action protocol before another non-prescriptive external-state task is attempted.
+
+## Scoring revision after the first member
+
+The first member (seed 3701) completed the exact five-action pre-boundary checkpoint, five-action post-boundary reread/output sequence, and terminal `done`, but its `run_end` recorded a false failure. The boundary snapshot uses the field `text` for ASCII bytes; the first scorer incorrectly inspected a nonexistent `content` field. The run and its false-negative status are retained unchanged. This revision corrects the scorer, adds a regression test for the snapshot schema, advances the sampling seed to 3702, and is a separate member rather than a relabeling of the first record.

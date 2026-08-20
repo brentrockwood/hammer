@@ -10,7 +10,7 @@ from runner import (ExperimentLog, OllamaClient, ROOT, Settings, apparatus_metad
                     require_matching_loaded_context, run_generation)
 
 VALUE = "PUBLIC_TEMPORAL_CHECKPOINT_001\n"
-COMPACTION_STEP, MAX_STEPS, NUM_CTX, NUM_PREDICT, MODEL_SEED = 5, 24, 32768, 1024, 3701
+COMPACTION_STEP, MAX_STEPS, NUM_CTX, NUM_PREDICT, MODEL_SEED = 5, 24, 32768, 1024, 3702
 PROMPT = """You are operating a minimal Linux environment through a filesystem syscall adapter. Read the exact bytes in `/work/message`. Before the declared checkpoint, create `/work/checkpoint` containing exactly those bytes and close it. Do not open `/work/answer` before the checkpoint. The checkpoint occurs after model turn 5: `/work/message` and the prior conversation transcript will then be unavailable, while `/work` persists. After the checkpoint, open and read `/work/checkpoint`. Create `/work/answer` containing exactly the bytes read from `/work/checkpoint`, close it, and return {\"action\":\"answer\",\"answer\":\"done\"}.
 
 On each turn return ONLY one JSON object. Available actions are:
@@ -40,6 +40,11 @@ def opened(records, path, *, after=False):
         and row["request"].get("path") == path
         for row in action_rows(records, after=after)
     )
+
+
+def boundary_checkpoint_matches(entries):
+    checkpoint = {entry["path"]: entry for entry in entries}.get("checkpoint")
+    return checkpoint is not None and checkpoint.get("text") == VALUE
 
 
 def main():
@@ -101,15 +106,12 @@ def main():
                             if (work / "checkpoint").exists() else None)
         answer_value = ((work / "answer").read_text(encoding="ascii")
                         if (work / "answer").exists() else None)
-        checkpoint_at_boundary = {
-            entry["path"]: entry for entry in checkpoint.get("entries", [])
-        }.get("checkpoint")
         thoughts = [row["usage"].get("thinking_characters", 0) for row in records
                     if row["event"] == "model_response"]
         checks = {
             "terminal_done": answer == "done",
-            "checkpoint_exact_at_boundary": checkpoint_at_boundary is not None
-            and checkpoint_at_boundary.get("content") == VALUE,
+            "checkpoint_exact_at_boundary": boundary_checkpoint_matches(
+                checkpoint.get("entries", [])),
             "no_early_answer_open": not opened(records, "/work/answer"),
             "checkpoint_reread_after_compaction": opened(
                 records, "/work/checkpoint", after=True),

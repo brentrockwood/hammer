@@ -12,6 +12,8 @@ from dependency_task import validate_answer as validate_dependency_answer
 from graph_task import generate_graph, validate_answer, write_fixture
 from runner import AgentContainer, ROOT, assistant_history_message, require_matching_loaded_context, run_generation
 from retrieval import generation_observations
+from thinking_temporal import VALUE as TEMPORAL_VALUE
+from thinking_temporal import boundary_checkpoint_matches
 
 
 class FakeLog:
@@ -297,6 +299,14 @@ class ApparatusTest(unittest.TestCase):
     def test_thinking_field_is_replayed_in_assistant_history(self):
         message = {"role": "assistant", "thinking": "inspect state", "content": '{"action":"answer","answer":"done"}'}
         self.assertEqual(assistant_history_message(message), message)
+
+    def test_temporal_control_scores_snapshot_text_not_a_nonexistent_content_field(self):
+        self.assertTrue(boundary_checkpoint_matches([
+            {"path": "checkpoint", "type": "file", "text": TEMPORAL_VALUE},
+        ]))
+        self.assertFalse(boundary_checkpoint_matches([
+            {"path": "checkpoint", "type": "file", "content": TEMPORAL_VALUE},
+        ]))
 
     def test_compaction_replaces_history_and_records_exact_continuation(self):
         log = MemoryLog()
