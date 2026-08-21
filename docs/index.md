@@ -25,6 +25,7 @@ Future experiment families should use the same compact form: an uppercase family
 | Thinking external-state ladder | 1,024-cap pair and 4,096-cap bridge recorded | Both caps hit reasoning-cap empty-content failures before testing preservation. The larger cap delayed the failure but did not yield a completed action trajectory, so its goal-only partner was not run. |
 | Thinking temporal-sequencing control | Apparatus calibration complete | The first model trajectory exposed a snapshot-field scorer false negative; the corrected seed-3702 member passed every temporal, exact-byte, transcript-loss, and isolation check. |
 | Thinking no-idle bridge | Thinking and non-thinking members complete | Both corrected close-triggered members created, rediscovered, read, and used self-named support files across transcript loss. The small descriptive pair does not estimate a reasoning effect. |
+| Storage-affordance salience | Six-member matched screen complete | The explicit positive control passed 6/6; the consequences-only arm acquired the source but created no qualifying support state in 6/6 members. The stop rule closes this task family. |
 | Future experiment register | Design notes only | Candidate terminal-feedback treatments and their interpretation boundaries are preserved separately from observed runs. |
 
 ## Read in this order
@@ -43,8 +44,9 @@ Future experiment families should use the same compact form: an uppercase family
 12. [Thinking external-state ladder](thinking-external-state-ladder-protocol.md) and its [result](thinking-external-state-ladder-results-20260820.md) — the representation-unspecified bridge, goal-only step-down, and response-cap boundary.
 13. [Thinking temporal-sequencing control](thinking-temporal-control-protocol.md) and its [result](thinking-temporal-control-results-20260820.md) — the explicit no-idle temporal and compaction positive control.
 14. [Thinking no-idle bridge](thinking-no-idle-bridge-protocol.md) and its [result](thinking-no-idle-bridge-results-20260820.md) — the representation-unspecified bridge semantic calibration.
-15. [Future experiment register](future-experiment-register.md) — candidate treatments retained for later design and review, not results.
-16. [VM execution design](vm-execution-design.md) — the separate future condition for native self-authored execution.
+15. [Storage-affordance salience](storage-affordance-salience-protocol.md), its [adversarial review](storage-affordance-salience-adversarial-review.md), and [result](storage-affordance-salience-results-20260821.md) — the bounded explicit-versus-consequences recognition screen.
+16. [Future experiment register](future-experiment-register.md) — candidate treatments retained for later design and review, not results.
+17. [VM execution design](vm-execution-design.md) — the separate future condition for native self-authored execution.
 
 ## Reading a run
 

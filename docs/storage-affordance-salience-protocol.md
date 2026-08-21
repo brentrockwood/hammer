@@ -46,3 +46,7 @@ The first two source-close explicit members read the source, opened and wrote `/
 ## Interpretation boundary
 
 The model sees a declared discontinuity and an immediate recovery requirement. A positive consequences member would show recognition under those stated facts, not unsignaled spontaneous persistence. A difference between arms would be descriptive at this sample size; it does not identify a general causal property of prompt wording, reasoning, or model capability.
+
+## Completed screen
+
+The revised explicit positive control passed all six members: each created `/work/checkpoint`, reread it after transcript loss, and completed the task. The consequences arm reached the source in all six members but created no qualifying support file, never reread support state, and exhausted its action budget without an answer. This satisfies the uniform-negative stopping rule for the consequences arm. No additional salience rungs will be run in this task family. See [results](storage-affordance-salience-results-20260821.md).
