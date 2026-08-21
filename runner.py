@@ -64,7 +64,7 @@ def git_commit():
 
 APPARATUS_PATHS = (
     ".dockerignore", "Dockerfile", "compose.yaml", "Makefile", "agent.c", "runner.py",
-    "harness.py", "persistence.py", "retrieval.py", "c48.py", "append_calibration.py", "d96.py", "d96_terminal.py", "thinking_probe.py", "thinking_bridge.py", "thinking_temporal.py", "thinking_no_idle_bridge.py", "corpus.py",
+    "harness.py", "persistence.py", "retrieval.py", "c48.py", "append_calibration.py", "d96.py", "d96_terminal.py", "thinking_probe.py", "thinking_bridge.py", "thinking_temporal.py", "thinking_no_idle_bridge.py", "storage_salience.py", "corpus.py",
     "graph_task.py", "dependency_task.py", "tests",
     "fixtures", "infrastructure",
 )
