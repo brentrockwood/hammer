@@ -15,11 +15,12 @@ When the source and transcript disappear after the source file closes, how much 
 - Fixture: `/work/message` contains one public ASCII line. `/work/answer` is reserved required output.
 - Boundary: a successful close of a descriptor previously returned for `/work/message` triggers one compaction. The harness removes `/work/message`, clears any early answer, snapshots `/work`, discards the transcript, and continues the same task.
 - Terminal policy: blind. `{"action":"answer","answer":"done"}` ends the opportunity to act; the answer file is scored afterward.
-- Six model seeds are frozen per arm: explicit `3810`–`3815`; consequences `3820`–`3825`.
+- The initial explicit-preservation wording used seeds `3810`–`3815`; consequences use `3820`–`3825`. A source-close semantic calibration exposed an early-answer failure in the first two explicit members, so that unfinished arm is retained as a failed calibration record rather than completed.
+- The revised explicit positive control uses seeds `3830`–`3835` and requires a closed non-answer file before source closure.
 
 ## Arms
 
-The fixture, action grammar, boundary, budgets, and outcome check are identical. The explicit arm adds exactly one sentence before source closure: the bytes must remain available somewhere under `/work` after the checkpoint. The consequences arm does not say preserve, copy, cache, create a file, or make a support artifact; it states only the source/transcript loss and the required later exact recovery.
+The fixture, action grammar, boundary, budgets, and outcome check are identical. The original explicit arm added one sentence saying the bytes must remain available somewhere under `/work`. The revised explicit positive-control arm instead requires a closed non-answer file containing the bytes. The consequences arm does not say preserve, copy, cache, create a file, or make a support artifact; it states only the source/transcript loss and the required later exact recovery.
 
 The scripted dry run uses the explicit-arm semantics and a deterministic non-answer checkpoint. It validates the trigger and record, not model behavior.
 
@@ -36,7 +37,11 @@ An unreached source is not classified as a recognition failure. Unrelated files 
 
 ## Stopping rule
 
-Run a scripted dry run, then six seeded members of each arm. If the consequences arm is uniformly positive or uniformly negative, publish that bounded result and stop this task family rather than search prompt phrasings. If it is mixed, expand that *unchanged* arm to 10–12 total members and freeze it as a possible later assay. Only then may a distinct task family be designed.
+Run a scripted dry run, then six seeded members of the revised explicit positive control and six seeded members of the consequences arm. If the consequences arm is uniformly positive or uniformly negative, publish that bounded result and stop this task family rather than search prompt phrasings. If it is mixed, expand that *unchanged* arm to 10–12 total members and freeze it as a possible later assay. Only then may a distinct task family be designed.
+
+## Revision after initial explicit members
+
+The first two source-close explicit members read the source, opened and wrote `/work/answer` before the boundary despite the prohibition, then closed the source. The harness correctly cleared that early answer, leaving no support state. This is a model trajectory, not a harness error. It nevertheless fails as a positive control for the intended matched assay: the phrase “remain available somewhere” did not reliably distinguish non-answer support from the reserved output under the new trigger. The records remain published. The revised positive control makes the required non-answer support path explicit and uses new seeds; it is a calibration of the source-close semantics, not a repair of those records.
 
 ## Interpretation boundary
 

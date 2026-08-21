@@ -14,6 +14,7 @@ VALUE = "PUBLIC_STORAGE_SALIENCE_001\n"
 MAX_STEPS, NUM_CTX, NUM_PREDICT = 32, 32768, 4096
 SEEDS = {
     "explicit": (3810, 3811, 3812, 3813, 3814, 3815),
+    "explicit_direct": (3830, 3831, 3832, 3833, 3834, 3835),
     "consequences": (3820, 3821, 3822, 3823, 3824, 3825),
 }
 COMMON_PROMPT = """You are operating a minimal Linux environment through a filesystem syscall adapter. `/work/message` contains public bytes. Read the exact bytes. Do not open `/work/answer` before the checkpoint. The checkpoint occurs immediately after you close `/work/message`: `/work/message` and the prior conversation transcript will then be unavailable, while `/work` persists. After that event, recover the original bytes from state available under `/work`, write them to `/work/answer`, close it, and return {\"action\":\"answer\",\"answer\":\"done\"}.
@@ -31,6 +32,10 @@ PROMPTS = {
     "explicit": COMMON_PROMPT.replace(
         "Read the exact bytes.",
         "Read the exact bytes. Before closing `/work/message`, ensure the exact bytes remain available somewhere under `/work` after the checkpoint.",
+    ),
+    "explicit_direct": COMMON_PROMPT.replace(
+        "Read the exact bytes.",
+        "Read the exact bytes. Before closing `/work/message`, create and close a file other than `/work/answer` under `/work` containing the exact bytes.",
     ),
     "consequences": COMMON_PROMPT,
 }
