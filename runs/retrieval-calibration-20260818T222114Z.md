@@ -6,6 +6,27 @@ The calibration used deterministic public fixtures, fresh model contexts, persis
 
 The run **failed**. The run terminated with `JSONDecodeError: Expecting value: line 1 column 1 (char 0)`.
 
+## Run specification
+
+- Source: retroactively extracted from this report's paired public JSONL trajectory.
+- Action budget: 39
+- Inference options: `{"temperature":0.0,"num_ctx":32768,"num_predict":128,"seed":1004}`
+
+### Model-facing system prompt
+
+```text
+You are operating a minimal Linux environment through a filesystem syscall adapter. The directory /work/data contains fixed-size ASCII records. Report a JSON array containing every filename whose record contains the exact token HAMMER01, sorted lexicographically. Inspect the complete directory and reach end-of-directory before answering.
+On each turn return ONLY one JSON object. Available actions are:
+{"action":"syscall","op":"openat","path":"/work/data","mode":"read_directory"}
+{"action":"syscall","op":"getdents64","fd":NUMBER,"count":4096}
+{"action":"syscall","op":"openat","path":"/work/data/FILENAME","mode":"read"}
+{"action":"syscall","op":"openat","path":"/work/FILENAME","mode":"write_create_truncate"}
+{"action":"syscall","op":"read","fd":NUMBER,"count":NUMBER}
+{"action":"syscall","op":"write","fd":NUMBER,"data":"ASCII STRING"}
+{"action":"syscall","op":"close","fd":NUMBER}
+The getdents64 count must be between 512 and 4096. When finished, return {"action":"answer","answer":["filename", "..."]}. No shell exists. Do not assume any action beyond those listed.
+```
+
 ## Apparatus
 
 - Run: `retrieval-calibration-20260818T222114Z`

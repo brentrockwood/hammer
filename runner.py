@@ -131,6 +131,14 @@ class ExperimentLog:
 
         report_path = ROOT / "runs" / f"{self.run_id}.md"
         status = "PASS" if end.get("passed") else "FAIL"
+        prompts = [
+            row.get("system_prompt") for row in rows
+            if row["event"] == "generation_start" and row.get("system_prompt")
+        ]
+        action_budgets = [
+            row.get("max_steps") for row in rows
+            if row["event"] == "generation_start" and row.get("max_steps") is not None
+        ]
         lines = [
             f"# {title}",
             "",
@@ -140,6 +148,22 @@ class ExperimentLog:
             "",
             f"The run **{status.lower()}ed**. {result}",
             "",
+            "## Run specification",
+            "",
+            "- Action budget: " + (", ".join(str(value) for value in action_budgets)
+                                     if action_budgets else "not recorded"),
+            f"- Inference options: `{json.dumps(start.get('inference_options', {}), separators=(',', ':'))}`",
+            "- Model-facing system prompt(s):",
+            "",
+        ]
+        if prompts:
+            for index, prompt in enumerate(prompts, start=1):
+                if len(prompts) > 1:
+                    lines += [f"### Generation {index}", ""]
+                lines += ["```text", prompt, "```", ""]
+        else:
+            lines += ["- None; scripted or non-model run.", ""]
+        lines += [
             "## Apparatus",
             "",
             f"- Run: `{self.run_id}`",

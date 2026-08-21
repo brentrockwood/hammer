@@ -6,6 +6,26 @@ A public one-line fixture explicitly required creation, rereading, and use of `/
 
 The run **passed**. Terminal response: `done`; checkpoint and answer checks are recorded below.
 
+## Run specification
+
+- Source: retroactively extracted from this report's paired public JSONL trajectory.
+- Action budget: 40
+- Inference options: `{"temperature":0.0,"num_ctx":32768,"num_predict":1024,"seed":3501,"think":true}`
+
+### Model-facing system prompt
+
+```text
+You are operating a minimal Linux environment through a filesystem syscall adapter. Read the exact bytes in `/work/message`. Create `/work/checkpoint` containing exactly those bytes and close it. Then open and read `/work/checkpoint`. Create `/work/answer` containing exactly the bytes read from `/work/checkpoint`, close it, and return {"action":"answer","answer":"done"}.
+
+On each turn return ONLY one JSON object. Available actions are:
+{"action":"syscall","op":"openat","path":"/work/FILENAME","mode":"read"}
+{"action":"syscall","op":"openat","path":"/work/FILENAME","mode":"write_create_truncate"}
+{"action":"syscall","op":"read","fd":NUMBER,"count":NUMBER}
+{"action":"syscall","op":"write","fd":NUMBER,"data":"ASCII STRING"}
+{"action":"syscall","op":"close","fd":NUMBER}
+No shell exists. Do not assume any action beyond those listed.
+```
+
 ## Apparatus
 
 - Run: `thinking-positive-control-20260820T202249Z`

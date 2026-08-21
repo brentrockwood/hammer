@@ -6,6 +6,31 @@ One deterministic 96-record dependency fixture ran in one continuous context wit
 
 The run **failed**. Terminal response: `done`; order validation: order needs exactly 96 nodes.
 
+## Run specification
+
+- Source: retroactively extracted from this report's paired public JSONL trajectory.
+- Action budget: 480
+- Inference options: `{"temperature":0.0,"num_ctx":32768,"num_predict":2048,"seed":3402,"think":false}`
+
+### Model-facing system prompt
+
+```text
+You are operating a minimal Linux environment through a filesystem syscall adapter. The directory /work/n contains a set of dependency records. Each record contains one line, `depends=`, followed by zero or more full paths of records that must precede that record.
+
+Write `/work/answer` as newline-separated full record paths: every record exactly once, with every listed dependency earlier than its dependent record. Do not modify anything under /work/n. When the file is complete, close it and return {"action":"answer","answer":"done"}.
+
+On each turn return ONLY one JSON object. Available actions are:
+{"action":"syscall","op":"openat","path":"/work/n","mode":"read_directory"}
+{"action":"syscall","op":"getdents64","fd":NUMBER,"count":4096}
+{"action":"syscall","op":"openat","path":"/work/n/FILENAME","mode":"read"}
+{"action":"syscall","op":"openat","path":"/work/FILENAME","mode":"write_create_truncate"}
+{"action":"syscall","op":"openat","path":"/work/FILENAME","mode":"write_append_create"}
+{"action":"syscall","op":"read","fd":NUMBER,"count":NUMBER}
+{"action":"syscall","op":"write","fd":NUMBER,"data":"ASCII STRING"}
+{"action":"syscall","op":"close","fd":NUMBER}
+No shell exists. Do not assume any action beyond those listed.
+```
+
 ## Apparatus
 
 - Run: `d96-terminal-original-20260820T091508Z`

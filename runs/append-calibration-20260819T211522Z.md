@@ -6,6 +6,13 @@ A scripted client, not a model, wrote one line with truncate-on-create, closed t
 
 The run **passed**. The recovered bytes were exactly the two-line sequence.
 
+## Run specification
+
+- Source: retroactively extracted from this report's paired public JSONL trajectory.
+- Action budget: 9
+- Inference options: `not recorded`
+
+- Model-facing system prompt: none; scripted or non-model run.
 ## Apparatus
 
 - Run: `append-calibration-20260819T211522Z`

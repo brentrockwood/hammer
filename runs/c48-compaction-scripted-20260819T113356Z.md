@@ -2,6 +2,13 @@
 
 This scripted dry run reached both declared compaction boundaries in the network-disabled container, with `/work/reference-route` present and `/work/answer` absent at each boundary. It then terminated before final-route validation because the reference client contained an erroneous post-check: after a syscall had already recorded a checkpoint, the loop treated the matching step number as evidence that the checkpoint had not been handled.
 
+## Run specification
+
+- Source: retroactively extracted from this report's paired public JSONL trajectory.
+- Action budget: 280
+- Inference options: `not recorded`
+
+- Model-facing system prompt: none; scripted or non-model run.
 ## What was attempted
 
 The host generated the frozen 48-node fixture and used a scripted client against the same syscall adapter planned for C48. The client wrote a host-known route to a non-output scratch file solely to test persistence transport, enumerated and read graph records, and recorded snapshots at steps 70 and 140. No model request was made.

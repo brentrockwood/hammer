@@ -6,6 +6,13 @@ A scripted reference client used the same network-disabled container and primiti
 
 The run **passed**. The scripted client used 165 turns; final-route validation: valid route.
 
+## Run specification
+
+- Source: retroactively extracted from this report's paired public JSONL trajectory.
+- Action budget: 280
+- Inference options: `not recorded`
+
+- Model-facing system prompt: none; scripted or non-model run.
 ## Apparatus
 
 - Run: `c48-compaction-scripted-20260819T113535Z`

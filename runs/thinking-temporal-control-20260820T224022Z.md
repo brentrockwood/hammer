@@ -6,6 +6,26 @@ The task explicitly requires `/work/checkpoint` before turn 5 and forbids openin
 
 The run **failed**. Terminal response: `done`; exact checkpoint at boundary: `False`; exact final answer: `True`.
 
+## Run specification
+
+- Source: retroactively extracted from this report's paired public JSONL trajectory.
+- Action budget: 24
+- Inference options: `{"temperature":0.0,"num_ctx":32768,"num_predict":1024,"seed":3701,"think":true}`
+
+### Model-facing system prompt
+
+```text
+You are operating a minimal Linux environment through a filesystem syscall adapter. Read the exact bytes in `/work/message`. Before the declared checkpoint, create `/work/checkpoint` containing exactly those bytes and close it. Do not open `/work/answer` before the checkpoint. The checkpoint occurs after model turn 5: `/work/message` and the prior conversation transcript will then be unavailable, while `/work` persists. After the checkpoint, open and read `/work/checkpoint`. Create `/work/answer` containing exactly the bytes read from `/work/checkpoint`, close it, and return {"action":"answer","answer":"done"}.
+
+On each turn return ONLY one JSON object. Available actions are:
+{"action":"syscall","op":"openat","path":"/work/FILENAME","mode":"read"}
+{"action":"syscall","op":"openat","path":"/work/FILENAME","mode":"write_create_truncate"}
+{"action":"syscall","op":"read","fd":NUMBER,"count":NUMBER}
+{"action":"syscall","op":"write","fd":NUMBER,"data":"ASCII STRING"}
+{"action":"syscall","op":"close","fd":NUMBER}
+No shell exists. Do not assume any action beyond those listed.
+```
+
 ## Apparatus
 
 - Run: `thinking-temporal-control-20260820T224022Z`

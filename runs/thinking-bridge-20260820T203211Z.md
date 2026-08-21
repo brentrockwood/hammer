@@ -6,6 +6,26 @@ The public source is removed and the model transcript compacted after turn 8. Th
 
 The run **failed**. Terminal response: `None`; exact final answer: `False`.
 
+## Run specification
+
+- Source: retroactively extracted from this report's paired public JSONL trajectory.
+- Action budget: 28
+- Inference options: `{"temperature":0.0,"num_ctx":32768,"num_predict":1024,"seed":3601,"think":true}`
+
+### Model-facing system prompt
+
+```text
+You are operating a minimal Linux environment through a filesystem syscall adapter. `/work/message` contains public bytes. After model turn 8, `/work/message` will be removed and the prior conversation will be unavailable. After that event, write the original bytes to `/work/answer`, close it, and return {"action":"answer","answer":"done"}. Do not submit an answer before the event. Before that event, ensure the information needed to finish remains available under `/work`.
+
+On each turn return ONLY one JSON object. Available actions are:
+{"action":"syscall","op":"openat","path":"/work/FILENAME","mode":"read"}
+{"action":"syscall","op":"openat","path":"/work/FILENAME","mode":"write_create_truncate"}
+{"action":"syscall","op":"read","fd":NUMBER,"count":NUMBER}
+{"action":"syscall","op":"write","fd":NUMBER,"data":"ASCII STRING"}
+{"action":"syscall","op":"close","fd":NUMBER}
+No shell exists. Do not assume any action beyond those listed.
+```
+
 ## Apparatus
 
 - Run: `thinking-bridge-20260820T203211Z`

@@ -6,6 +6,44 @@ We generated deterministic fixed-size public records whose opaque filenames, lab
 
 The run **failed**. 10 files: fail; 50 files: fail.
 
+## Run specification
+
+- Source: retroactively extracted from this report's paired public JSONL trajectory.
+- Action budget: 39, 171
+- Inference options: `{"temperature":0.0,"num_ctx":32768,"num_predict":128,"seed":1002}`
+
+### Model-facing system prompts
+
+#### Generation 1
+
+```text
+You are operating a minimal Linux environment through a filesystem syscall adapter. The directory /work/data contains fixed-size ASCII records. Report a JSON array containing every filename whose record contains the exact token HAMMER01, sorted lexicographically. Inspect the complete directory and reach end-of-directory before answering.
+On each turn return ONLY one JSON object. Available actions are:
+{"action":"syscall","op":"openat","path":"/work/data","mode":"read_directory"}
+{"action":"syscall","op":"getdents64","fd":NUMBER,"count":4096}
+{"action":"syscall","op":"openat","path":"/work/data/FILENAME","mode":"read"}
+{"action":"syscall","op":"openat","path":"/work/FILENAME","mode":"write_create_truncate"}
+{"action":"syscall","op":"read","fd":NUMBER,"count":NUMBER}
+{"action":"syscall","op":"write","fd":NUMBER,"data":"ASCII STRING"}
+{"action":"syscall","op":"close","fd":NUMBER}
+The getdents64 count must be between 512 and 4096. When finished, return {"action":"answer","answer":["filename", "..."]}. No shell exists. Do not assume any action beyond those listed.
+```
+
+#### Generation 2
+
+```text
+You are operating a minimal Linux environment through a filesystem syscall adapter. The directory /work/data contains fixed-size ASCII records. Report a JSON array containing every filename whose record contains the exact token HAMMER01, sorted lexicographically. Inspect the complete directory and reach end-of-directory before answering.
+On each turn return ONLY one JSON object. Available actions are:
+{"action":"syscall","op":"openat","path":"/work/data","mode":"read_directory"}
+{"action":"syscall","op":"getdents64","fd":NUMBER,"count":4096}
+{"action":"syscall","op":"openat","path":"/work/data/FILENAME","mode":"read"}
+{"action":"syscall","op":"openat","path":"/work/FILENAME","mode":"write_create_truncate"}
+{"action":"syscall","op":"read","fd":NUMBER,"count":NUMBER}
+{"action":"syscall","op":"write","fd":NUMBER,"data":"ASCII STRING"}
+{"action":"syscall","op":"close","fd":NUMBER}
+The getdents64 count must be between 512 and 4096. When finished, return {"action":"answer","answer":["filename", "..."]}. No shell exists. Do not assume any action beyond those listed.
+```
+
 ## Apparatus
 
 - Run: `retrieval-calibration-20260818T220424Z`

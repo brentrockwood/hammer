@@ -6,6 +6,27 @@ The bridge prompt requires exact bytes to remain somewhere under `/work`, prohib
 
 The run **failed**. Terminal response: `None`; exact support at boundary: `True`; exact final answer: `False`.
 
+## Run specification
+
+- Source: retroactively extracted from this report's paired public JSONL trajectory.
+- Action budget: 32
+- Inference options: `{"temperature":0.0,"num_ctx":32768,"num_predict":4096,"seed":3802,"think":true}`
+
+### Model-facing system prompt
+
+```text
+You are operating a minimal Linux environment through a filesystem syscall adapter. `/work/message` contains public bytes. Before the declared checkpoint, read the exact bytes and ensure they remain available somewhere under `/work` after `/work/message` is removed. Do not open `/work/answer` before the checkpoint. The checkpoint occurs after model turn 5: `/work/message` and the prior conversation transcript will then be unavailable, while `/work` persists. After that event, inspect `/work`, recover the original bytes from state available there, write them to `/work/answer`, close it, and return {"action":"answer","answer":"done"}.
+
+On each turn return ONLY one JSON object. Available actions are:
+{"action":"syscall","op":"openat","path":"/work/FILENAME","mode":"read"}
+{"action":"syscall","op":"openat","path":"/work","mode":"read_directory"}
+{"action":"syscall","op":"getdents64","fd":NUMBER,"count":512}
+{"action":"syscall","op":"write","fd":NUMBER,"data":"ASCII STRING"}
+{"action":"syscall","op":"close","fd":NUMBER}
+{"action":"syscall","op":"openat","path":"/work/FILENAME","mode":"write_create_truncate"}
+No shell exists. Do not assume any action beyond those listed.
+```
+
 ## Apparatus
 
 - Run: `thinking-no-idle-bridge-20260820T225306Z`
