@@ -4,6 +4,8 @@
 
 This is the second, deliberately different salience family. It tests whether the storage result transfers from preserving a literal value to retaining information derived from source records. It is not Pilot 1 evidence.
 
+The frozen screen is complete. Its results are recorded in [derived-mapping-salience-results-20260822.md](derived-mapping-salience-results-20260822.md).
+
 ## Task
 
 `/work/rules/` contains four ordered substitution records and `/work/query` contains eight symbols. The model must write their composed transformation to `/work/answer`. After the model has read and closed every rule file, the harness deletes `/work/rules/`, clears an early answer, discards the transcript, and leaves `/work/query` available. The prompt does not mention notes, tables, indexes, caches, copying sources, or persistent storage.
